@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+
 </script>
 
 <template>
-  <main>
+  <DefaultLayout>
     <h1>This is the home page</h1>
-  </main>
+  </DefaultLayout>
 </template>
