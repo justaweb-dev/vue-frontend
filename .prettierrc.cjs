@@ -5,8 +5,8 @@ module.exports = {
   singleQuote: true,
   semi: false,
   plugins: [
-    "prettier-plugin-organize-imports",
-    "prettier-plugin-tailwindcss"
+    "prettier-plugin-tailwindcss",
+    "@trivago/prettier-plugin-sort-imports"
   ],
   tailwindPreserveWhitespace: true,
 }
