@@ -1,16 +1,43 @@
 <script setup lang="ts">
+import router from '@/router'
 import { HButton, HNavbar, type ImageType } from '@justawebdev/histoire-library'
-import { RouterLink } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { useRoute, RouterLink } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+
+/**
+ * Stores
+ */
+const userStore = useUserStore()
+const { getCurrentUser, logout } = userStore
+
+/**
+ * Route handling
+ */
+const route = useRoute()
+
+/**
+ * Computed variables
+ */
+const user = computed(() => userStore.user)
 
 const logo = {
   src: 'https://images.seeklogo.com/logo-png/8/1/lorem-ipsum-logo-png_seeklogo-85587.png',
   alt: 'Logo',
 } as ImageType
-const menuList = [
-  { label: 'Home', path: '/' },
-  { label: 'About', path: '/about' },
-]
-const user = null
+const menuList = computed(() => user.value && user.value.username ? [{ label: 'User', path: '/user' }] : [])
+
+/**
+ * Lifecycle hooks
+ */
+onMounted(async() => {
+  await getCurrentUser()
+})
+
+const handleLogout = async () => {
+  await logout()
+  router.push('/')
+}
 </script>
 
 <template>
@@ -19,7 +46,9 @@ const user = null
   >
     <HNavbar :menu="menuList">
       <template #logo>
-        <img :src="logo.src" :alt="logo.alt" class="h-8 w-auto" />
+        <RouterLink :to="user && user.username ? '/user' : '/'"
+          ><img :src="logo.src" :alt="logo.alt" class="h-8 w-auto" />
+        </RouterLink>
       </template>
       <template #menuList>
         <li v-for="item in menuList" :key="item.label">
@@ -30,16 +59,19 @@ const user = null
             {{ item.label }}
           </RouterLink>
         </li>
-        <li>
-          <RouterLink to="/login" v-if="!user"
-            ><HButton label="login"
-          /></RouterLink>
-        </li>
-        <li>
-          <RouterLink to="/register" v-if="!user"
-            ><HButton label="register"
-          /></RouterLink>
-        </li>
+        <template v-if="user">
+          <li>
+            <HButton label="logout" @click="handleLogout" />
+          </li>
+        </template>
+        <template v-else>
+          <li v-if="route.name !== 'login'">
+            <RouterLink to="/login"><HButton label="login" /></RouterLink>
+          </li>
+          <li v-if="route.name !== 'register'">
+            <RouterLink to="/register"><HButton label="register" /></RouterLink>
+          </li>
+        </template>
       </template>
     </HNavbar>
     <slot />
