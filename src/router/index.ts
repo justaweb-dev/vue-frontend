@@ -26,6 +26,11 @@ const routes = [
     name: 'user',
     component: User,
   },
+  {
+    path: '/email-confirmation',
+    name: 'email-confirmation',
+    component: () => import('@/views/EmailConfirmation.vue'),
+  },
   // {
   //   path: '/403',
   //   name: 'forbidden',
