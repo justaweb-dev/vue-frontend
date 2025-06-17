@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import router from '@/router'
+import { useUserStore } from '@/stores/user'
 import { HButton, HNavbar, type ImageType } from '@justawebdev/histoire-library'
 import { computed, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import { useUserStore } from '@/stores/user'
 
 /**
  * Stores
@@ -25,13 +25,17 @@ const logo = {
   src: 'https://images.seeklogo.com/logo-png/8/1/lorem-ipsum-logo-png_seeklogo-85587.png',
   alt: 'Logo',
 } as ImageType
-const menuList = computed(() => user.value && user.value.username ? [{ label: 'User', path: '/user' }] : [])
+const menuList = computed(() =>
+  user.value && user.value.username ? [{ label: 'User', path: '/user' }] : [],
+)
 
 /**
  * Lifecycle hooks
  */
 onMounted(async() => {
-  await getCurrentUser()
+  if (!user.value) {
+    await getCurrentUser()
+  }
 })
 
 const handleLogout = async () => {

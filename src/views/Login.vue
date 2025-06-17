@@ -41,7 +41,6 @@ const handleLogin = async () => {
   const result = await login(email.value, password.value)
 
   if (result.success) {
-    console.log('Login successful:', result)
     success.value = result.message
     router.push('/user')
   } else {

@@ -21,8 +21,13 @@ export const useUserStore = defineStore('user', () => {
     try {
       const res = await fetch('http://localhost:1337/api/users/me?populate=*', {
         method: 'GET',
-        credentials: 'include'
+        credentials: 'include',
       })
+
+      if (res.status === 403) {
+        console.warn('Usuario no autenticado')
+        return null
+      }
 
       if (!res.ok) throw new Error('Failed to fetch user data')
 
@@ -40,7 +45,10 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; message: string }> => {
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<{ success: boolean; message: string }> => {
     try {
       const res = await fetch('http://localhost:1337/api/auth/local', {
         method: 'POST',
@@ -49,18 +57,24 @@ export const useUserStore = defineStore('user', () => {
           identifier: email,
           password: password,
         }),
-        credentials: 'include'
+        credentials: 'include',
       })
 
       const data = await res.json()
       if (!res.ok) {
-        return { success: false, message: data?.error?.message || 'Login failed.' }
+        return {
+          success: false,
+          message: data?.error?.message || 'Login failed.',
+        }
       }
 
-      const userData = await fetch('http://localhost:1337/api/users/me?populate=*', {
-        method: 'GET',
-        credentials: 'include'
-      })
+      const userData = await fetch(
+        'http://localhost:1337/api/users/me?populate=*',
+        {
+          method: 'GET',
+          credentials: 'include',
+        },
+      )
 
       const userJson = await userData.json()
       if (!userData.ok) {
@@ -78,7 +92,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       await fetch('http://localhost:1337/api/auth/local', {
         method: 'DELETE',
-        credentials: 'include'
+        credentials: 'include',
       })
       clearCurrentUser()
     } catch (err) {

@@ -1,9 +1,9 @@
+import { useUserStore } from '@/stores/user'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
 import Register from '@/views/Register.vue'
 import User from '@/views/User.vue'
 import { createRouter, createWebHistory } from 'vue-router'
-import { useUserStore } from '@/stores/user'
 
 const routes = [
   {
