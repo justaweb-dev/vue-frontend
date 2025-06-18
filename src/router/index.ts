@@ -31,6 +31,11 @@ const routes = [
     name: 'email-confirmation',
     component: () => import('@/views/EmailConfirmation.vue'),
   },
+  {
+    path: '/user/resetpassword',
+    name: 'resetpassword',
+    component: () => import('@/views/ResetPassword.vue'),
+  },
   // {
   //   path: '/403',
   //   name: 'forbidden',

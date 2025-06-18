@@ -32,7 +32,7 @@ const menuList = computed(() =>
 /**
  * Lifecycle hooks
  */
-onMounted(async() => {
+onMounted(async () => {
   if (!user.value) {
     await getCurrentUser()
   }

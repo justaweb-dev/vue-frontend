@@ -2,7 +2,7 @@
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
-import { HButton, HInput } from '@justawebdev/histoire-library'
+import { HButton, HInput, HModal } from '@justawebdev/histoire-library'
 import { ref } from 'vue'
 
 /**
@@ -18,6 +18,8 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 const success = ref('')
+const resetEmail = ref('')
+const showResetModal = ref(false)
 
 /**
  * Methods
@@ -54,6 +56,35 @@ const handleLogin = async () => {
   email.value = ''
   password.value = ''
 }
+
+const handleResetPassword = async () => {
+  if (!resetEmail.value) {
+    error.value = 'Email is required.'
+    return
+  }
+
+  const response = await fetch(
+    'http://localhost:1337/api/auth/forgot-password',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email: resetEmail.value }),
+    },
+  )
+
+  const data = await response.json()
+
+  if (response.ok) {
+    success.value = 'Reset link sent to your email.'
+  } else {
+    error.value = data.message || 'Failed to send reset link.'
+  }
+
+  resetEmail.value = ''
+  showResetModal.value = false
+}
 </script>
 
 <template>
@@ -87,6 +118,25 @@ const handleLogin = async () => {
           {{ success }}
         </div>
       </form>
+      <button
+        class="mt-4 text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
+        @click="() => (showResetModal = true)"
+      >
+        Reset Password
+      </button>
     </div>
+    <HModal v-model:modelValue="showResetModal">
+      <template #content>
+        <p class="mb-4">Please enter your email to reset your password.</p>
+        <HInput v-model="resetEmail" label="Email" type="email" required />
+      </template>
+      <template #footer>
+        <HButton
+          label="Send Reset Link"
+          @click="handleResetPassword"
+          class="mt-4"
+        />
+      </template>
+    </HModal>
   </DefaultLayout>
 </template>
