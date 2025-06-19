@@ -2,11 +2,11 @@
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { useFileStore } from '@/stores/file'
 import { useUserStore } from '@/stores/user'
-import { HButton, HInputUpload, HModal } from '@justawebdev/histoire-library'
-import { onMounted, ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { HButton, HInput, HInputUpload, HModal } from '@justawebdev/histoire-library'
+import { storeToRefs } from 'pinia'
+import { onMounted, ref } from 'vue'
 
 /**
  * API URL
@@ -18,7 +18,7 @@ const API_URL = import.meta.env.VITE_API_URL
  */
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
-const { getCurrentUser, updateUser } = userStore
+const { getCurrentUser, updateUser, changePassword } = userStore
 const fileStore = useFileStore()
 const { uploadFile, deleteFile } = fileStore
 
@@ -27,7 +27,12 @@ const { uploadFile, deleteFile } = fileStore
  */
 const selectedImage = ref<File | null>(null)
 const isUploading = ref(false)
-const openRemoveImageModal = ref(false)
+const showRemoveImageModal = ref(false)
+const showResetModal = ref(false)
+// Password change variables
+const currentPassword = ref('')
+const password = ref('')
+const passwordConfirmation = ref('')
 
 /**
  * lifecycle hooks
@@ -59,7 +64,10 @@ const handleUserUpdate = async () => {
         field: 'image',
       })
       if (uploadedImage) {
-        await updateUser(user.value.id, {user: user.value, image: uploadedImage})
+        await updateUser(user.value.id, {
+          user: user.value,
+          image: uploadedImage,
+        })
         await getCurrentUser()
         selectedImage.value = null
       }
@@ -77,12 +85,36 @@ const handleRemoveImage = async () => {
       await deleteFile(user.value.image.id)
       await updateUser(user.value.id, { ...user.value, image: null })
       await getCurrentUser()
-      openRemoveImageModal.value = false
-      
+      showRemoveImageModal.value = false
+
       selectedImage.value = null
     } catch (error) {
       console.error('Error removing image:', error)
     }
+  }
+}
+
+const handleChangePassword = async () => {
+  // if (!currentPassword.value || !password.value || !passwordConfirmation.value) {
+  //   alert('All fields are required.')
+  //   return
+  // }
+  // if (password.value !== passwordConfirmation.value) {
+  //   alert('Passwords do not match.')
+  //   return
+  // }
+
+  try {
+    await changePassword(currentPassword.value, password.value, passwordConfirmation.value)
+
+    alert('Password changed successfully.')
+    showResetModal.value = false
+    currentPassword.value = ''
+    password.value = ''
+    passwordConfirmation.value = ''
+  } catch (error) {
+    console.error('Error changing password:', error)
+    alert(error.message)
   }
 }
 </script>
@@ -111,6 +143,7 @@ const handleRemoveImage = async () => {
           user.email
         }}</span>
       </div>
+      <HButton label="Change Password" @click="() => (showResetModal = true)" />
       <div v-if="user.image" :key="imageKey" class="mt-6 flex flex-col gap-2">
         <span class="text-gray-700 dark:text-gray-200 font-semibold"
           >Profile Picture</span
@@ -122,7 +155,7 @@ const handleRemoveImage = async () => {
             class="w-32 h-32 rounded-full object-cover"
           />
           <button
-            @click="openRemoveImageModal = true"
+            @click="showRemoveImageModal = true"
             class="text-red-700 hover:text-red-500 transition duration-200 cursor-pointer"
             title="Remove file"
           >
@@ -146,9 +179,12 @@ const handleRemoveImage = async () => {
         :disabled="isUploading"
       />
     </div>
-    <HModal v-model:modelValue="openRemoveImageModal">
+    <!-- Modal to confirm image removal -->
+    <HModal v-model:modelValue="showRemoveImageModal">
       <template #content>
-        <p class="mb-4">Are you sure you want to remove your profile picture?</p>
+        <p class="mb-4">
+          Are you sure you want to remove your profile picture?
+        </p>
       </template>
       <template #footer>
         <HButton
@@ -159,7 +195,39 @@ const handleRemoveImage = async () => {
         <HButton
           label="Cancel"
           class-name="ml-2"
-          @click="openRemoveImageModal = false"
+          @click="showRemoveImageModal = false"
+        />
+      </template>
+    </HModal>
+    <!-- Modal to change password -->
+    <HModal v-model:modelValue="showResetModal">
+      <template #content>
+        <div class="flex flex-col gap-4">
+          <HInput
+            v-model="currentPassword"
+            label="Current Password"
+            type="password"
+            required
+          />
+          <HInput
+            v-model="password"
+            label="New Password"
+            type="password"
+            required
+          />
+          <HInput
+            v-model="passwordConfirmation"
+            label="Confirm new password"
+            type="password"
+            required
+          />
+        </div>
+      </template>
+      <template #footer>
+        <HButton
+          label="Save new password"
+          @click="handleChangePassword"
+          class-name="mt-4"
         />
       </template>
     </HModal>

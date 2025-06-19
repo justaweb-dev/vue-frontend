@@ -118,12 +118,7 @@ const handleResetPassword = async () => {
           {{ success }}
         </div>
       </form>
-      <button
-        class="mt-4 text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
-        @click="() => (showResetModal = true)"
-      >
-        Reset Password
-      </button>
+      <HButton label="Reset Password" @click="() => (showResetModal = true)" withoutBackground class-name="mt-4" />
     </div>
     <HModal v-model:modelValue="showResetModal">
       <template #content>
