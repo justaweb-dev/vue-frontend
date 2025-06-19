@@ -4,6 +4,9 @@ import { useUserStore } from '@/stores/user'
 import { HButton, HNavbar, type ImageType } from '@justawebdev/histoire-library'
 import { computed, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
+import { useDark, useToggle } from '@vueuse/core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
 
 /**
  * Stores
@@ -15,6 +18,12 @@ const { getCurrentUser, logout } = userStore
  * Route handling
  */
 const route = useRoute()
+
+/**
+ * Reactive variables
+ */
+const isDark = useDark()
+const toggleDark = useToggle(isDark)
 
 /**
  * Computed variables
@@ -62,6 +71,9 @@ const handleLogout = async () => {
           >
             {{ item.label }}
           </RouterLink>
+        </li>
+        <li>
+          <FontAwesomeIcon class="cursor-pointer text-gray-700 dark:text-white" :icon="isDark ? faSun : faMoon" @click="toggleDark()" />
         </li>
         <template v-if="user">
           <li>
