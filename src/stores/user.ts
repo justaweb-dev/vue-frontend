@@ -9,8 +9,8 @@ export const useUserStore = defineStore('user', () => {
   const username = computed(() => user.value?.username ?? '')
   const email = computed(() => user.value?.email ?? '')
 
-  const setCurrentUser = (username: string, email: string) => {
-    user.value = { username, email }
+  const setCurrentUser = (userData: User) => {
+    user.value = userData
   }
 
   const clearCurrentUser = () => {
@@ -32,16 +32,48 @@ export const useUserStore = defineStore('user', () => {
       if (!res.ok) throw new Error('Failed to fetch user data')
 
       const data = await res.json()
-      const userData: User = {
-        username: data.username,
-        email: data.email,
-      }
-      user.value = userData
-      return userData
+
+      setCurrentUser(data)
+      return data
     } catch (err) {
       console.error('Error fetching user data:', err)
       user.value = null
       return null
+    }
+  }
+
+  const updateUser = async (
+    id: string,
+    userUpdateData: User,
+  ): Promise<{ success: boolean; message: string }> => {
+    try {
+      const res = await fetch(`http://localhost:1337/api/users/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userUpdateData),
+        credentials: 'include',
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        return {
+          success: false,
+          message: errorData?.error?.message || 'Failed to update user.',
+        }
+      }
+
+      const data = await res.json()
+
+      if (!data) {
+        return { success: false, message: 'User not found.' }
+      }
+
+      return data
+    } catch (err) {
+      console.error('Error updating user:', err)
+      return { success: false, message: 'An unexpected error occurred.' }
     }
   }
 
@@ -61,6 +93,7 @@ export const useUserStore = defineStore('user', () => {
       })
 
       const data = await res.json()
+
       if (!res.ok) {
         return {
           success: false,
@@ -68,7 +101,7 @@ export const useUserStore = defineStore('user', () => {
         }
       }
 
-      const userData = await fetch(
+      const resUser = await fetch(
         'http://localhost:1337/api/users/me?populate=*',
         {
           method: 'GET',
@@ -76,12 +109,12 @@ export const useUserStore = defineStore('user', () => {
         },
       )
 
-      const userJson = await userData.json()
-      if (!userData.ok) {
+      if (!resUser.ok) {
         return { success: false, message: 'Failed to fetch user data.' }
       }
 
-      setCurrentUser(userJson.username, userJson.email)
+      const dataUser = await resUser.json()
+      setCurrentUser(dataUser)
       return { success: true, message: 'Login successful!' }
     } catch (err) {
       return { success: false, message: 'An unexpected error occurred.' }
@@ -110,5 +143,6 @@ export const useUserStore = defineStore('user', () => {
     getCurrentUser,
     login,
     logout,
+    updateUser,
   }
 })
