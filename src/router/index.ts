@@ -1,8 +1,8 @@
 import { useUserStore } from '@/stores/user'
 import Home from '@/views/Home.vue'
-import Login from '@/views/Login.vue'
-import Register from '@/views/Register.vue'
 import User from '@/views/User.vue'
+import Login from '@/views/auth/Login.vue'
+import Register from '@/views/auth/Register.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
@@ -29,12 +29,12 @@ const routes = [
   {
     path: '/email-confirmation',
     name: 'email-confirmation',
-    component: () => import('@/views/EmailConfirmation.vue'),
+    component: () => import('@/views/auth/EmailConfirmation.vue'),
   },
   {
     path: '/user/resetpassword',
     name: 'resetpassword',
-    component: () => import('@/views/ResetPassword.vue'),
+    component: () => import('@/views/auth/ResetPassword.vue'),
   },
   // {
   //   path: '/403',

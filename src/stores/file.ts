@@ -44,7 +44,7 @@ export const useFileStore = defineStore('file', () => {
         credentials: 'include',
       })
       if (!res.ok) throw new Error('Failed to delete file.')
-        
+
       return true
     } catch (err) {
       error.value = (err as Error).message || 'Failed to delete file.'

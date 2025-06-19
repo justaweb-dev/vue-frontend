@@ -1,12 +1,20 @@
 <script setup lang="ts">
+import { useHasNonSavedChanges } from '@/composables/hasNonSavedChanges'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import router from '@/router'
 import { useFileStore } from '@/stores/file'
 import { useUserStore } from '@/stores/user'
+import type { User } from '@/types'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { HButton, HInput, HInputUpload, HModal } from '@justawebdev/histoire-library'
+import {
+  HButton,
+  HInput,
+  HInputUpload,
+  HModal,
+} from '@justawebdev/histoire-library'
 import { storeToRefs } from 'pinia'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 /**
  * API URL
@@ -18,27 +26,36 @@ const API_URL = import.meta.env.VITE_API_URL
  */
 const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
-const { getCurrentUser, updateUser, changePassword } = userStore
+const { getCurrentUser, updateUser, changePassword, deleteUser } = userStore
 const fileStore = useFileStore()
 const { uploadFile, deleteFile } = fileStore
 
 /**
  * Reactive variables
  */
+const originalUser = ref<User | null>(null)
 const selectedImage = ref<File | null>(null)
 const isUploading = ref(false)
 const showRemoveImageModal = ref(false)
 const showResetModal = ref(false)
+const showDeleteAccountModal = ref(false)
 // Password change variables
 const currentPassword = ref('')
 const password = ref('')
 const passwordConfirmation = ref('')
 
 /**
+ * Composable for checking unsaved changes
+ */
+const { hasChanges, resetChanges } = useHasNonSavedChanges(user)
+
+/**
  * lifecycle hooks
  */
 onMounted(async () => {
-  if (!user.value) {
+  if (user.value) {
+    originalUser.value = JSON.parse(JSON.stringify(user.value))
+  } else {
     await getCurrentUser()
   }
 })
@@ -69,6 +86,7 @@ const handleUserUpdate = async () => {
           image: uploadedImage,
         })
         await getCurrentUser()
+        hasChanges.value = false
         selectedImage.value = null
       }
     } catch (error) {
@@ -87,6 +105,7 @@ const handleRemoveImage = async () => {
       await getCurrentUser()
       showRemoveImageModal.value = false
 
+      hasChanges.value = false
       selectedImage.value = null
     } catch (error) {
       console.error('Error removing image:', error)
@@ -95,19 +114,26 @@ const handleRemoveImage = async () => {
 }
 
 const handleChangePassword = async () => {
-  // if (!currentPassword.value || !password.value || !passwordConfirmation.value) {
-  //   alert('All fields are required.')
-  //   return
-  // }
-  // if (password.value !== passwordConfirmation.value) {
-  //   alert('Passwords do not match.')
-  //   return
-  // }
+  if (
+    !currentPassword.value ||
+    !password.value ||
+    !passwordConfirmation.value
+  ) {
+    alert('All fields are required.')
+    return
+  }
+  if (password.value !== passwordConfirmation.value) {
+    alert('Passwords do not match.')
+    return
+  }
 
   try {
-    await changePassword(currentPassword.value, password.value, passwordConfirmation.value)
+    await changePassword(
+      currentPassword.value,
+      password.value,
+      passwordConfirmation.value,
+    )
 
-    alert('Password changed successfully.')
     showResetModal.value = false
     currentPassword.value = ''
     password.value = ''
@@ -117,12 +143,33 @@ const handleChangePassword = async () => {
     alert(error.message)
   }
 }
+
+const handleDeleteAccount = async () => {
+  try {
+    await deleteUser(user.value.id)
+    showDeleteAccountModal.value = false
+    // Redirect to home or login page after deletion
+    router.push('/')
+  } catch (error) {
+    console.error('Error deleting account:', error)
+    alert(error.message)
+  }
+}
+
+watch(selectedImage, (newImage, _oldImage) => {
+  const hadNoImageBefore = user.value.image === null
+  const hasNewImageNow = newImage !== null
+
+  if (hadNoImageBefore && hasNewImageNow) {
+    hasChanges.value = true
+  }
+})
 </script>
 
 <template>
   <DefaultLayout>
     <div
-      class="max-w-md mx-auto flex flex-col p-8 bg-white dark:bg-gray-800 rounded shadow gap-4 mt-12"
+      class="max-w-lg mx-auto flex flex-col p-8 bg-white dark:bg-gray-800 rounded shadow gap-4 mt-12"
     >
       <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
         User Profile
@@ -143,8 +190,17 @@ const handleChangePassword = async () => {
           user.email
         }}</span>
       </div>
-      <HButton label="Change Password" @click="() => (showResetModal = true)" />
-      <div v-if="user.image" :key="imageKey" class="mt-6 flex flex-col gap-2">
+      <div class="flex flex-row gap-4 justify-between">
+        <HButton
+          label="Change Password"
+          @click="() => (showResetModal = true)"
+        />
+        <HButton
+          label="Delete account"
+          @click="() => (showDeleteAccountModal = true)"
+        />
+      </div>
+      <div v-if="user.image" class="mt-6 flex flex-col gap-2">
         <span class="text-gray-700 dark:text-gray-200 font-semibold"
           >Profile Picture</span
         >
@@ -176,7 +232,7 @@ const handleChangePassword = async () => {
         label="Update Profile"
         class-name="mt-4"
         @click="handleUserUpdate"
-        :disabled="isUploading"
+        :disabled="!hasChanges || isUploading"
       />
     </div>
     <!-- Modal to confirm image removal -->
@@ -187,16 +243,18 @@ const handleChangePassword = async () => {
         </p>
       </template>
       <template #footer>
-        <HButton
-          label="Remove"
-          class-name="bg-red-600 hover:bg-red-500 text-white"
-          @click="handleRemoveImage"
-        />
-        <HButton
-          label="Cancel"
-          class-name="ml-2"
-          @click="showRemoveImageModal = false"
-        />
+        <div class="flex flex-row gap-4 justify-between">
+          <HButton
+            label="Remove"
+            class-name="bg-red-600 hover:bg-red-500 text-white"
+            @click="handleRemoveImage"
+          />
+          <HButton
+            label="Cancel"
+            class-name="ml-2"
+            @click="showRemoveImageModal = false"
+          />
+        </div>
       </template>
     </HModal>
     <!-- Modal to change password -->
@@ -229,6 +287,26 @@ const handleChangePassword = async () => {
           @click="handleChangePassword"
           class-name="mt-4"
         />
+      </template>
+    </HModal>
+    <!-- Modal to confirm account deletion -->
+    <HModal v-model:modelValue="showDeleteAccountModal">
+      <template #content>
+        <p class="mb-4">Are you sure you want to delete your account?</p>
+      </template>
+      <template #footer>
+        <div class="flex flex-row gap-4 justify-between">
+          <HButton
+            label="Cancel"
+            class-name="ml-2"
+            @click="showDeleteAccountModal = false"
+          />
+          <HButton
+            label="Delete"
+            class-name="bg-red-600 hover:bg-red-500 text-white"
+            @click="handleDeleteAccount"
+          />
+        </div>
       </template>
     </HModal>
   </DefaultLayout>

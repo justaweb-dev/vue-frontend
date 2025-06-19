@@ -118,7 +118,12 @@ const handleResetPassword = async () => {
           {{ success }}
         </div>
       </form>
-      <HButton label="Reset Password" @click="() => (showResetModal = true)" withoutBackground class-name="mt-4" />
+      <HButton
+        label="Reset Password"
+        @click="() => (showResetModal = true)"
+        withoutBackground
+        class-name="mt-4"
+      />
     </div>
     <HModal v-model:modelValue="showResetModal">
       <template #content>

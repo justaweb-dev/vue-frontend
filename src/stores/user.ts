@@ -139,18 +139,21 @@ export const useUserStore = defineStore('user', () => {
     passwordConfirmation: string,
   ): Promise<{ success: boolean; message: string }> => {
     try {
-      const res = await fetch('http://localhost:1337/api/auth/change-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const res = await fetch(
+        'http://localhost:1337/api/auth/change-password',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            currentPassword,
+            password,
+            passwordConfirmation,
+          }),
+          credentials: 'include',
         },
-        body: JSON.stringify({
-          currentPassword,
-          password,
-          passwordConfirmation,
-        }),
-        credentials: 'include',
-      })
+      )
 
       if (!res.ok) {
         const errorData = await res.json()
@@ -170,6 +173,29 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const deleteUser = async (
+    id: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    try {
+      const res = await fetch(`http://localhost:1337/api/users/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      if (!res.ok) {
+        const errorData = await res.json()
+        return {
+          success: false,
+          message: errorData?.error?.message || 'Failed to delete user.',
+        }
+      }
+      clearCurrentUser()
+      return { success: true, message: 'User deleted successfully.' }
+    } catch (err) {
+      console.error('Error deleting user:', err)
+      return { success: false, message: 'An unexpected error occurred.' }
+    }
+  }
+
   return {
     user,
     isAuthenticated,
@@ -181,6 +207,7 @@ export const useUserStore = defineStore('user', () => {
     login,
     logout,
     updateUser,
-    changePassword
+    changePassword,
+    deleteUser,
   }
 })
