@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
-import { HButton, HNavbar, type ImageType } from '@justawebdev/histoire-library'
-import { computed, onMounted } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
-import { useDark, useToggle } from '@vueuse/core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
+import { HButton, HNavbar, type ImageType } from '@justawebdev/histoire-library'
+import { useDark, useToggle } from '@vueuse/core'
+import { computed, onMounted } from 'vue'
+import { useRoute, RouterLink } from 'vue-router'
 
 /**
  * Stores
@@ -35,7 +35,12 @@ const logo = {
   alt: 'Logo',
 } as ImageType
 const menuList = computed(() =>
-  user.value && user.value.username ? [{ label: 'User', path: '/user' }] : [],
+  user.value && user.value.username
+    ? [
+        { label: 'Posts', path: '/posts' },
+        { label: 'User', path: '/user' },
+      ]
+    : [],
 )
 
 /**
@@ -73,7 +78,11 @@ const handleLogout = async () => {
           </RouterLink>
         </li>
         <li>
-          <FontAwesomeIcon class="cursor-pointer text-gray-700 dark:text-white" :icon="isDark ? faSun : faMoon" @click="toggleDark()" />
+          <FontAwesomeIcon
+            class="cursor-pointer text-gray-700 dark:text-white"
+            :icon="isDark ? faSun : faMoon"
+            @click="toggleDark()"
+          />
         </li>
         <template v-if="user">
           <li>

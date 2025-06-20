@@ -5,8 +5,8 @@ import router from '@/router'
 import { useFileStore } from '@/stores/file'
 import { useUserStore } from '@/stores/user'
 import type { User } from '@/types'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
   HButton,
   HInput,

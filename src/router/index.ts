@@ -41,11 +41,11 @@ const routes = [
   //   name: 'forbidden',
   //   component: () => import('@/views/403.vue'),
   // },
-  // {
-  //   path: '/posts',
-  //   name: 'posts',
-  //   component: () => import('@/views/Posts.vue'),
-  // },
+  {
+    path: '/posts',
+    name: 'posts',
+    component: () => import('@/views/posts/Index.vue'),
+  },
 ]
 
 const router = createRouter({
