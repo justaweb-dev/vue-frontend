@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { HButton, HNavbar, type ImageType } from '@justawebdev/histoire-library'
 import { useDark, useToggle } from '@vueuse/core'
 import { computed, onMounted } from 'vue'
