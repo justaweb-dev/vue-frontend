@@ -46,6 +46,16 @@ const routes = [
     name: 'posts',
     component: () => import('@/views/posts/Index.vue'),
   },
+  {
+    path: '/posts/:id',
+    name: 'post',
+    component: () => import('@/views/posts/Post.vue'),
+  },
+  {
+    path: '/tags/:id',
+    name: 'tag',
+    component: () => import('@/views/tags/Tag.vue'),
+  },
 ]
 
 const router = createRouter({

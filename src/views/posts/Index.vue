@@ -3,7 +3,7 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import type { Post } from '@/types'
 import { HTable } from '@justawebdev/histoire-library'
 import { ref, watch, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,7 +14,6 @@ const postsPerPage = 10
 
 // Página actual sincronizada con la query param "page"
 const currentPage = ref(1)
-const totalItems = ref(0)
 
 // Función para hacer fetch paginado a Strapi
 async function fetchPosts(page = 1) {
@@ -29,6 +28,7 @@ async function fetchPosts(page = 1) {
       },
     )
     const data = await res.json()
+    console.log('Fetched posts data:', data)
     if (!res.ok) {
       posts.value = []
       totalPosts.value = 0
@@ -36,9 +36,7 @@ async function fetchPosts(page = 1) {
     }
     posts.value = data.data
     totalPosts.value = data.meta.pagination.total
-    totalItems.value = data.meta.pagination.total
     currentPage.value = page
-    console.log('Posts fetched:', posts.value)
   } catch (e) {
     posts.value = []
     totalPosts.value = 0
@@ -46,16 +44,16 @@ async function fetchPosts(page = 1) {
 }
 
 // Lee la página actual del query param y hace fetch
-onMounted(() => {
+onMounted(async () => {
   const pageFromQuery = parseInt(route.query.page as string)
   if (pageFromQuery && pageFromQuery > 0) currentPage.value = pageFromQuery
-  fetchPosts(currentPage.value)
+  await fetchPosts(currentPage.value)
 })
 
 // Al cambiar currentPage, actualizamos URL y hacemos fetch
-watch(currentPage, (newPage) => {
+watch(currentPage, async (newPage) => {
   router.replace({ query: { ...route.query, page: String(newPage) } })
-  fetchPosts(newPage)
+  await fetchPosts(newPage)
 })
 </script>
 
@@ -67,15 +65,24 @@ watch(currentPage, (newPage) => {
         No posts available.
       </p>
       <HTable
-        v-else
         v-model:current-page="currentPage"
         :rows="posts"
         :columns="[
-          { key: 'title', label: 'Title' }
+          { key: 'title', label: 'Title' },
+          { key: 'link', label: 'Link' },
         ]"
         :rows-per-page="postsPerPage"
-        :total-items="totalItems"
-      />
+        :total-items="totalPosts"
+      >
+        <template #cell-title="{ value, row }">
+          <RouterLink
+            :to="`/posts/${row.documentId}`"
+            class="font-bold text-sky-700 hover:underline"
+          >
+            <pre>{{ row.title }}</pre>
+          </RouterLink>
+        </template>
+      </HTable>
     </div>
   </DefaultLayout>
 </template>

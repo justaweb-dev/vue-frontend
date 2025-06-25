@@ -5,10 +5,11 @@ export interface User {
 }
 
 export interface Post {
+  documentId: string
   title: string
   body: string
   tags?: (string | number)[]
-  media?: (string | number)[]
+  media?: Media
   locale: string
   localizations?: (string | number)[]
 }
@@ -27,4 +28,13 @@ export interface Media {
   size: number
   url: string
   previewUrl: string | null
+}
+
+export interface Tag {
+  id: number
+  documentId: string
+  name: string
+  createdAt: string
+  updatedAt: string
+  publishedAt: string
 }
