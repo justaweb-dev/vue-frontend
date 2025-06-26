@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { usePostStore } from '@/stores/post'
+import { storeToRefs } from 'pinia'
 import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -19,6 +20,7 @@ const route = useRoute()
  */
 const postStore = usePostStore()
 const { fetchPostById } = postStore
+const { post } = storeToRefs(postStore)
 
 /**
  * Lifcycle hooks
@@ -31,41 +33,29 @@ onMounted(async () => {
 <template>
   <DefaultLayout>
     <div class="container mx-auto p-4">
-      <div v-if="postStore.loading" class="text-center py-10 text-gray-500">
-        Loading post...
-      </div>
-      <div v-else-if="postStore.error" class="text-center py-10 text-red-500">
-        {{ postStore.error }}
-      </div>
-      <div v-else-if="postStore.post">
-        <h1 class="text-3xl font-bold mb-4">{{ postStore.post.title }}</h1>
-        <div
-          v-if="postStore.post.media && postStore.post.media.length"
-          class="mb-4 flex flex-wrap gap-4"
-        >
+      <div v-if="post">
+        <h1 class="text-3xl font-bold mb-4">{{ post.title }}</h1>
+        <div v-if="Array.isArray(post.media) && post.media.length" class="mb-4 flex flex-wrap gap-4">
           <img
-            v-for="media in postStore.post.media"
+            v-for="media in post.media"
             :src="API_URL + media.url"
-            :alt="media.alternativeText || postStore.post.title"
+            :alt="media.alternativeText || post.title"
             class="rounded shadow max-h-64"
           />
         </div>
-        <div
-          class="prose dark:prose-invert mb-4"
-          v-html="postStore.post.body"
-        ></div>
-        <div
-          v-if="postStore.post.tags && postStore.post.tags.length"
-          class="mt-4"
-        >
+        <div class="prose dark:prose-invert mb-4" v-html="post.body"></div>
+        <div v-if="Array.isArray(post.tags) && post.tags.length" class="mt-4">
           <RouterLink
-            v-for="tag in postStore.post.tags"
-            :key="tag.id"
+            v-for="tag in post.tags"
+            :key="typeof tag === 'object' && tag.id ? tag.id : tag"
             class="inline-block bg-sky-100 text-sky-700 rounded px-2 py-1 mr-2 text-xs"
-            :to="`/tags/${tag.documentId}`"
-            >{{ tag.name as string }}
+            :to="typeof tag === 'object' && tag.documentId ? `/tags/${tag.documentId}` : '#'"
+            >{{ typeof tag === 'object' && tag.name ? tag.name : tag }}
           </RouterLink>
         </div>
+      </div>
+      <div v-else class="text-center py-10 text-red-500">
+        Error loading post data.
       </div>
     </div>
   </DefaultLayout>
