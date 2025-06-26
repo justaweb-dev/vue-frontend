@@ -23,7 +23,7 @@ const { fetchPostById } = postStore
 const { post } = storeToRefs(postStore)
 
 /**
- * Lifcycle hooks
+ * Lifecycle hooks
  */
 onMounted(async () => {
   await fetchPostById(route.params.id as string)
@@ -35,7 +35,10 @@ onMounted(async () => {
     <div class="container mx-auto p-4">
       <div v-if="post">
         <h1 class="text-3xl font-bold mb-4">{{ post.title }}</h1>
-        <div v-if="Array.isArray(post.media) && post.media.length" class="mb-4 flex flex-wrap gap-4">
+        <div
+          v-if="Array.isArray(post.media) && post.media.length"
+          class="mb-4 flex flex-wrap gap-4"
+        >
           <img
             v-for="media in post.media"
             :src="API_URL + media.url"
@@ -49,7 +52,11 @@ onMounted(async () => {
             v-for="tag in post.tags"
             :key="typeof tag === 'object' && tag.id ? tag.id : tag"
             class="inline-block bg-sky-100 text-sky-700 rounded px-2 py-1 mr-2 text-xs"
-            :to="typeof tag === 'object' && tag.documentId ? `/tags/${tag.documentId}` : '#'"
+            :to="
+              typeof tag === 'object' && tag.documentId
+                ? `/tags/${tag.documentId}`
+                : '#'
+            "
             >{{ typeof tag === 'object' && tag.name ? tag.name : tag }}
           </RouterLink>
         </div>

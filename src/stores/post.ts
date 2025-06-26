@@ -18,6 +18,7 @@ export const usePostStore = defineStore('post', () => {
       const res = await fetch(
         `${API_URL}/api/posts?pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
         {
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -68,15 +69,13 @@ export const usePostStore = defineStore('post', () => {
 
   const fetchPostById = async (id: string | number) => {
     try {
-      const res = await fetch(
-        `${API_URL}/api/posts/${id}?populate=*`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
+      const res = await fetch(`${API_URL}/api/posts/${id}?populate=*`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      )
+        credentials: 'include',
+      })
       const data = await res.json()
       if (!res.ok) {
         throw new Error(`HTTP error! Status: ${res.status}`)
@@ -95,6 +94,6 @@ export const usePostStore = defineStore('post', () => {
     currentPage,
     createPost,
     fetchAllPosts,
-    fetchPostById
+    fetchPostById,
   }
 })

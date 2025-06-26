@@ -106,13 +106,10 @@ export const useUserStore = defineStore('user', () => {
         }
       }
 
-      const resUser = await fetch(
-        `${API_URL}/api/users/me?populate=*`,
-        {
-          method: 'GET',
-          credentials: 'include',
-        },
-      )
+      const resUser = await fetch(`${API_URL}/api/users/me?populate=*`, {
+        method: 'GET',
+        credentials: 'include',
+      })
 
       if (!resUser.ok) {
         return { success: false, message: 'Failed to fetch user data.' }
@@ -144,21 +141,18 @@ export const useUserStore = defineStore('user', () => {
     passwordConfirmation: string,
   ): Promise<{ success: boolean; message: string }> => {
     try {
-      const res = await fetch(
-        `${API_URL}/api/auth/change-password`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            currentPassword,
-            password,
-            passwordConfirmation,
-          }),
-          credentials: 'include',
+      const res = await fetch(`${API_URL}/api/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      )
+        body: JSON.stringify({
+          currentPassword,
+          password,
+          passwordConfirmation,
+        }),
+        credentials: 'include',
+      })
 
       if (!res.ok) {
         const errorData = await res.json()
@@ -201,6 +195,76 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const resetPassword = async (
+    code: string,
+    password: string,
+    passwordConfirmation: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          password,
+          passwordConfirmation,
+        }),
+      })
+      if (!res.ok) {
+        throw new Error('Error resetting password')
+      }
+      return { success: true, message: 'Password reset successfully' }
+    } catch (err: any) {
+      console.error('Error resetting password:', err)
+      return {
+        success: false,
+        message: err.message || 'Error resetting password',
+      }
+    }
+  }
+
+  const register = async (username: string, email: string, password: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/local/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        return { success: true, message: 'Registration successful. Please check your email.' }
+      } else {
+        return { success: false, message: data.message || 'Registration failed.' }
+      }
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Registration failed.' }
+    }
+  }
+
+  const forgotPassword = async (email: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        return { success: true, message: 'Reset link sent to your email.' }
+      } else {
+        return { success: false, message: data.message || 'Failed to send reset link.' }
+      }
+    } catch (err: any) {
+      return { success: false, message: err.message || 'Failed to send reset link.' }
+    }
+  }
+
   return {
     user,
     isAuthenticated,
@@ -214,5 +278,8 @@ export const useUserStore = defineStore('user', () => {
     updateUser,
     changePassword,
     deleteUser,
+    resetPassword,
+    register,
+    forgotPassword,
   }
 })

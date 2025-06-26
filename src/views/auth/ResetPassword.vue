@@ -1,39 +1,33 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import router from '@/router'
+import { useUserStore } from '@/stores/user'
 import { HButton, HInput } from '@justawebdev/histoire-library'
 import { ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 /**
- * API URL
+ * Store
  */
-const API_URL = import.meta.env.VITE_API_URL
+const usersStore = useUserStore()
+const { resetPassword } = usersStore
 
 const password = ref('')
 const confirmPassword = ref('')
-const error = ref(false)
 
 const route = useRoute()
-const router = useRouter()
 
-const resetPassword = async () => {
-  error.value = false
-  try {
-    await fetch(`${API_URL}/api/auth/reset-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        code: route.query.code,
-        password: password.value,
-        passwordConfirmation: confirmPassword.value,
-      }),
-    })
+const handleResetPassword = async () => {
+  const code = route.query.code as string
+  const result = await resetPassword(
+    code,
+    password.value,
+    confirmPassword.value,
+  )
+  if (result.success) {
     router.push('/login')
-  } catch (err) {
-    console.error('Error resetting password:', err)
-    error.value = true
+  } else {
+    console.error(result.message)
   }
 }
 </script>
@@ -46,10 +40,7 @@ const resetPassword = async () => {
           <h1 class="font-bold text-left text-4xl mb-10">
             Recover your Password
           </h1>
-          <p v-show="error" class="text-sm text-red-500">
-            An Error Occurred, Please Try Again
-          </p>
-          <form @submit.prevent="resetPassword" class="w-1/2 space-y-4">
+          <form @submit.prevent="handleResetPassword" class="w-1/2 space-y-4">
             <HInput
               v-model="password"
               label="Password"

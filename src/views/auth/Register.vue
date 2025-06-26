@@ -3,17 +3,16 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import router from '@/router'
 import { HButton, HInput } from '@justawebdev/histoire-library'
 import { ref } from 'vue'
-
-/**
- * API URL
- */
-const API_URL = import.meta.env.VITE_API_URL
+import { useUserStore } from '@/stores/user'
 
 const username = ref('')
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const success = ref(false)
+
+const userStore = useUserStore()
+const { register } = userStore
 
 const validateEmail = (email: string) => {
   return /\S+@\S+\.\S+/.test(email)
@@ -30,30 +29,16 @@ const handleRegister = async () => {
     error.value = 'Invalid email address.'
     return
   }
-
-  const registerNewUser = await fetch(
-    `${API_URL}/api/auth/local/register`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: username.value,
-        email: email.value,
-        password: password.value,
-      }),
-    },
+  const result = await register(
+    username.value,
+    email.value,
+    password.value
   )
-
-  const data = await registerNewUser.json()
-  if (registerNewUser.ok) {
+  if (result.success) {
     success.value = true
   } else {
-    error.value = data.message || 'Registration failed.'
+    error.value = result.message
   }
-
-  // Clear the input fields after registration
   username.value = ''
   email.value = ''
   password.value = ''

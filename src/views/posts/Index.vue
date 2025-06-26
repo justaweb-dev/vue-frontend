@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { usePostStore } from '@/stores/post'
-import { HTable } from '@justawebdev/histoire-library'
+import { HTable, HPagination } from '@justawebdev/histoire-library'
 import { storeToRefs } from 'pinia'
 import { watch, onMounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -42,9 +42,7 @@ watch(currentPage, async (newPage) => {
       <HTable
         v-model:current-page="currentPage"
         :rows="posts"
-        :columns="[
-          { key: 'title', label: 'Title' }
-        ]"
+        :columns="[{ key: 'title', label: 'Title' }]"
         :rows-per-page="postsPerPage"
         :total-items="totalPosts"
       >
@@ -57,6 +55,12 @@ watch(currentPage, async (newPage) => {
           </RouterLink>
         </template>
       </HTable>
+      <HPagination
+        v-if="totalPosts > postsPerPage"
+        v-model:currentPage="currentPage"
+        :rows-per-page="postsPerPage"
+        :total-items="totalPosts"
+      />
     </div>
   </DefaultLayout>
 </template>

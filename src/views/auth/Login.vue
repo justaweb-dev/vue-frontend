@@ -14,7 +14,7 @@ const API_URL = import.meta.env.VITE_API_URL
  * Stores
  */
 const userStore = useUserStore()
-const { login } = userStore
+const { login, forgotPassword } = userStore
 
 /**
  * Reactive variables
@@ -67,26 +67,12 @@ const handleResetPassword = async () => {
     error.value = 'Email is required.'
     return
   }
-
-  const response = await fetch(
-    `${API_URL}/api/auth/forgot-password`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email: resetEmail.value }),
-    },
-  )
-
-  const data = await response.json()
-
-  if (response.ok) {
-    success.value = 'Reset link sent to your email.'
+  const result = await forgotPassword(resetEmail.value)
+  if (result.success) {
+    success.value = result.message
   } else {
-    error.value = data.message || 'Failed to send reset link.'
+    error.value = result.message
   }
-
   resetEmail.value = ''
   showResetModal.value = false
 }

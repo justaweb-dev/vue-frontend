@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import type { Tag } from '@/types'
-import { HCard } from '@justawebdev/histoire-library'
-import { ref, onMounted } from 'vue'
+import { useTagStore } from '@/stores/tag'
+import { HCard, HPagination } from '@justawebdev/histoire-library'
+import { storeToRefs } from 'pinia'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 
 /**
@@ -11,36 +12,22 @@ import { useRoute, RouterLink } from 'vue-router'
 const API_URL = import.meta.env.VITE_API_URL
 
 const route = useRoute()
-const tag = ref<Tag | null>(null)
+const tagStore = useTagStore()
+const { fetchTagById } = tagStore
+const { tag, tagPosts } = storeToRefs(tagStore)
 
-async function fetchTag() {
-  try {
-    const res = await fetch(
-      `${API_URL}/api/tags/${route.params.id}?populate=*`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      },
-    )
+const currentPage = ref(1)
+const rowsPerPage = 10
 
-    const data = await res.json()
-    console.log('Fetched tag data:', data)
-
-    if (!res.ok) {
-      throw new Error(`HTTP error! Status: ${res.status}`)
-    }
-
-    tag.value = { id: data.data.id, ...data.data }
-  } catch (e) {
-    console.error('Error loading tag:', e)
-    tag.value = null
-  }
-}
+const paginatedPosts = computed(() => {
+  if (!tagPosts.value) return []
+  const start = (currentPage.value - 1) * rowsPerPage
+  const end = start + rowsPerPage
+  return tagPosts.value.slice(start, end)
+})
 
 onMounted(async () => {
-  await fetchTag()
+  await fetchTagById(route.params.id as string)
 })
 </script>
 
@@ -49,11 +36,11 @@ onMounted(async () => {
     <div class="container mx-auto p-4">
       <div v-if="tag">
         <h1 class="text-3xl font-bold mb-8">{{ tag.name }}</h1>
-        <div v-if="tag.posts.length">
+        <div v-if="tagPosts.length">
           <h2 class="text-xl font-semibold mb-4">Posts with this tag:</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:!gap-6">
             <HCard
-              v-for="post in tag.posts"
+              v-for="post in paginatedPosts"
               :key="post.id"
               :title="post.title"
               :body="post.body.substring(0, 100) + '...'"
@@ -93,6 +80,14 @@ onMounted(async () => {
               </template>
             </HCard>
           </div>
+        </div>
+        <div v-if="tagPosts.length > rowsPerPage" class="mt-6">
+          <HPagination
+            :current-page="currentPage"
+            :rows-per-page="rowsPerPage"
+            :total-items="tagPosts.length"
+            @update:currentPage="(val) => (currentPage = val)"
+          />
         </div>
       </div>
       <div v-else class="text-center py-10 text-red-500">
