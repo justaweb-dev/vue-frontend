@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router'
 import { HButton, HInput, HInputUpload } from '@justawebdev/histoire-library'
 import { storeToRefs } from 'pinia'
 import { useFileStore } from '@/stores/file'
+import { useUserStore } from '@/stores/user'
 
 const postStore = usePostStore()
 const { createPost } = postStore
@@ -16,6 +17,8 @@ const { tags } = storeToRefs(tagStore)
 const router = useRouter()
 const fileStore = useFileStore()
 const { uploadFile } = fileStore
+const usersStore = useUserStore()
+const { user } = usersStore
 const selectedImage = ref<File | null>(null)
 
 const title = ref('')
@@ -38,12 +41,21 @@ const slugify = (text: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)+/g, '')
 
+const handleImageChange = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file) {
+    selectedImage.value = file
+  }
+}
+
 const handleCreate = async () => {
   error.value = ''
   success.value = ''
   let mediaId = null
   if (selectedImage.value) {
-    const uploaded = await uploadFile(selectedImage.value)
+    const file = selectedImage.value
+    const uploaded = await uploadFile(file)
     if (uploaded && typeof uploaded === 'object' && 'id' in uploaded) {
       mediaId = uploaded.id
     } else if (typeof uploaded === 'string') {
@@ -57,13 +69,22 @@ const handleCreate = async () => {
     error.value = 'Title and body are required.'
     return
   }
+  const userId = user?.id
+  if (!userId) {
+    error.value = 'You must be logged in to create a post.'
+    return
+  }
+  const tagsDocumentIds = selectedTags.value
+    .map(tagId => tags.value.find(t => t.id === tagId)?.documentId)
+    .filter(Boolean)
   const payload = {
     title: title.value,
     body: body.value,
     slug: slugify(title.value),
-    tags: selectedTags.value,
+    tags: { set: tagsDocumentIds },
     locale: 'en',
     media: mediaId ? [mediaId] : [],
+    users_permissions_user: +userId,
   }
   const result = await createPost(payload as any)
   if (result.success) {
@@ -82,19 +103,20 @@ const handleCreate = async () => {
       <form @submit.prevent="handleCreate" class="flex flex-col gap-4">
         <HInput v-model="title" class-name="[&_label]:font-semibold" label="Title" id="title" required />
         <label class="font-semibold">Body</label>
-        <textarea v-model="body" id="body" rows="6" class="border rounded p-2" required />
+        <textarea v-model="body" id="body" rows="6" class="block w-full px-4 py-2 mt-2 text-gray-800 bg-zinc-100 border border-gray-400 rounded-md dark:border-gray-600 focus:border-sky-400 focus:ring-sky-300 focus:ring-opacity-40 dark:focus:border-sky-300 focus:outline-none focus:ring disabled:cursor-not-allowed disabled:opacity-50" required />
         <label class="font-semibold">Tags</label>
-        <select v-model="selectedTags" multiple class="border rounded p-2">
+        <select v-model="selectedTags" multiple class="block w-full px-4 py-2 mt-2 text-gray-800 bg-zinc-100 border border-gray-400 rounded-md dark:border-gray-600 focus:border-sky-400 focus:ring-sky-300 focus:ring-opacity-40 dark:focus:border-sky-300 focus:outline-none focus:ring disabled:cursor-not-allowed disabled:opacity-50">
           <option v-for="tag in tags" :key="tag.id" :value="tag.id">
             {{ tag.name }}
           </option>
         </select>
         <HInputUpload
           v-model="selectedImage"
-          class-name="[&_label]:font-semibold"
+          id="post-image-upload"
           label="Upload Image"
-          id="image"
+          class-name="[&_label]:font-semibold"
           :allowed-files="'image/*'"
+          @change="handleImageChange"
         />
         <HButton label="Create Post" class-name="mt-4" />
         <div v-if="error" class="text-red-600 mt-2">{{ error }}</div>

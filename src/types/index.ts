@@ -1,4 +1,5 @@
 export interface User {
+  id: number
   username: string
   email: string
   image?: Media
@@ -7,11 +8,13 @@ export interface User {
 export interface Post {
   documentId: string
   title: string
+  slug: string
   body: string
   tags?: (string | number)[]
   media?: Media
   locale: string
   localizations?: (string | number)[]
+  user_permissions_user: number
 }
 
 export interface Media {
