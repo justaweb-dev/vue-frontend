@@ -4,6 +4,11 @@ import router from '@/router'
 import { HButton, HInput } from '@justawebdev/histoire-library'
 import { ref } from 'vue'
 
+/**
+ * API URL
+ */
+const API_URL = import.meta.env.VITE_API_URL
+
 const username = ref('')
 const email = ref('')
 const password = ref('')
@@ -27,7 +32,7 @@ const handleRegister = async () => {
   }
 
   const registerNewUser = await fetch(
-    'http://localhost:1337/api/auth/local/register',
+    `${API_URL}/api/auth/local/register`,
     {
       method: 'POST',
       headers: {

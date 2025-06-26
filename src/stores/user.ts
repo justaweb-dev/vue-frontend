@@ -2,6 +2,11 @@ import type { User } from '@/types'
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+/**
+ * API URL
+ */
+const API_URL = import.meta.env.VITE_API_URL
+
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null)
 
@@ -19,7 +24,7 @@ export const useUserStore = defineStore('user', () => {
 
   const getCurrentUser = async (): Promise<User | null> => {
     try {
-      const res = await fetch('http://localhost:1337/api/users/me?populate=*', {
+      const res = await fetch(`${API_URL}/api/users/me?populate=*`, {
         method: 'GET',
         credentials: 'include',
       })
@@ -47,7 +52,7 @@ export const useUserStore = defineStore('user', () => {
     userUpdateData: User,
   ): Promise<{ success: boolean; message: string }> => {
     try {
-      const res = await fetch(`http://localhost:1337/api/users/${id}`, {
+      const res = await fetch(`${API_URL}/api/users/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +87,7 @@ export const useUserStore = defineStore('user', () => {
     password: string,
   ): Promise<{ success: boolean; message: string }> => {
     try {
-      const res = await fetch('http://localhost:1337/api/auth/local', {
+      const res = await fetch(`${API_URL}/api/auth/local`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -102,7 +107,7 @@ export const useUserStore = defineStore('user', () => {
       }
 
       const resUser = await fetch(
-        'http://localhost:1337/api/users/me?populate=*',
+        `${API_URL}/api/users/me?populate=*`,
         {
           method: 'GET',
           credentials: 'include',
@@ -123,7 +128,7 @@ export const useUserStore = defineStore('user', () => {
 
   const logout = async () => {
     try {
-      await fetch('http://localhost:1337/api/auth/local', {
+      await fetch(`${API_URL}/api/auth/local`, {
         method: 'DELETE',
         credentials: 'include',
       })
@@ -140,7 +145,7 @@ export const useUserStore = defineStore('user', () => {
   ): Promise<{ success: boolean; message: string }> => {
     try {
       const res = await fetch(
-        'http://localhost:1337/api/auth/change-password',
+        `${API_URL}/api/auth/change-password`,
         {
           method: 'POST',
           headers: {
@@ -177,7 +182,7 @@ export const useUserStore = defineStore('user', () => {
     id: string,
   ): Promise<{ success: boolean; message: string }> => {
     try {
-      const res = await fetch(`http://localhost:1337/api/users/${id}`, {
+      const res = await fetch(`${API_URL}/api/users/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       })

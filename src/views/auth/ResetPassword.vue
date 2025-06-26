@@ -4,6 +4,11 @@ import { HButton, HInput } from '@justawebdev/histoire-library'
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+/**
+ * API URL
+ */
+const API_URL = import.meta.env.VITE_API_URL
+
 const password = ref('')
 const confirmPassword = ref('')
 const error = ref(false)
@@ -14,7 +19,7 @@ const router = useRouter()
 const resetPassword = async () => {
   error.value = false
   try {
-    await fetch(`http://localhost:1337/api/auth/reset-password`, {
+    await fetch(`${API_URL}/api/auth/reset-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

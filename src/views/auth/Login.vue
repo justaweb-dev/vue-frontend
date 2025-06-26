@@ -6,6 +6,11 @@ import { HButton, HInput, HModal } from '@justawebdev/histoire-library'
 import { ref } from 'vue'
 
 /**
+ * API URL
+ */
+const API_URL = import.meta.env.VITE_API_URL
+
+/**
  * Stores
  */
 const userStore = useUserStore()
@@ -64,7 +69,7 @@ const handleResetPassword = async () => {
   }
 
   const response = await fetch(
-    'http://localhost:1337/api/auth/forgot-password',
+    `${API_URL}/api/auth/forgot-password`,
     {
       method: 'POST',
       headers: {

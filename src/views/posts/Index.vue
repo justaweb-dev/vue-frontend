@@ -1,59 +1,34 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import type { Post } from '@/types'
+import { usePostStore } from '@/stores/post'
 import { HTable } from '@justawebdev/histoire-library'
-import { ref, watch, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { watch, onMounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
 
-const posts = ref<Post[]>([])
-const totalPosts = ref(0)
+/**
+ * Stores
+ */
+const postStore = usePostStore()
+const { fetchAllPosts } = postStore
+const { currentPage, posts, totalPosts } = storeToRefs(postStore)
+
 const postsPerPage = 10
-
-// Página actual sincronizada con la query param "page"
-const currentPage = ref(1)
-
-// Función para hacer fetch paginado a Strapi
-async function fetchPosts(page = 1) {
-  try {
-    const res = await fetch(
-      `http://localhost:1337/api/posts?pagination[page]=${page}&pagination[pageSize]=${postsPerPage}&populate=*`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      },
-    )
-    const data = await res.json()
-    console.log('Fetched posts data:', data)
-    if (!res.ok) {
-      posts.value = []
-      totalPosts.value = 0
-      return
-    }
-    posts.value = data.data
-    totalPosts.value = data.meta.pagination.total
-    currentPage.value = page
-  } catch (e) {
-    posts.value = []
-    totalPosts.value = 0
-  }
-}
 
 // Lee la página actual del query param y hace fetch
 onMounted(async () => {
   const pageFromQuery = parseInt(route.query.page as string)
   if (pageFromQuery && pageFromQuery > 0) currentPage.value = pageFromQuery
-  await fetchPosts(currentPage.value)
+  await fetchAllPosts(currentPage.value, postsPerPage)
 })
 
 // Al cambiar currentPage, actualizamos URL y hacemos fetch
 watch(currentPage, async (newPage) => {
   router.replace({ query: { ...route.query, page: String(newPage) } })
-  await fetchPosts(newPage)
+  await fetchAllPosts(newPage, postsPerPage)
 })
 </script>
 
@@ -68,8 +43,7 @@ watch(currentPage, async (newPage) => {
         v-model:current-page="currentPage"
         :rows="posts"
         :columns="[
-          { key: 'title', label: 'Title' },
-          { key: 'link', label: 'Link' },
+          { key: 'title', label: 'Title' }
         ]"
         :rows-per-page="postsPerPage"
         :total-items="totalPosts"

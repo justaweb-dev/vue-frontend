@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+/**
+ * API URL
+ */
+const API_URL = import.meta.env.VITE_API_URL
+
 export const useFileStore = defineStore('file', () => {
   const files = ref<any[]>([])
   const error = ref<string | null>(null)
@@ -21,7 +26,7 @@ export const useFileStore = defineStore('file', () => {
       if (options?.refId) formData.append('refId', String(options.refId))
       if (options?.field) formData.append('field', options.field)
 
-      const res = await fetch('http://localhost:1337/api/upload', {
+      const res = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
         body: formData,
         credentials: 'include',
@@ -39,7 +44,7 @@ export const useFileStore = defineStore('file', () => {
 
   const deleteFile = async (id: string | number): Promise<boolean> => {
     try {
-      const res = await fetch(`http://localhost:1337/api/upload/files/${id}`, {
+      const res = await fetch(`${API_URL}/api/upload/files/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       })

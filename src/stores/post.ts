@@ -2,19 +2,25 @@ import type { Post } from '@/types'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+/**
+ * API URL
+ */
+const API_URL = import.meta.env.VITE_API_URL
+
 export const usePostStore = defineStore('post', () => {
   const posts = ref<Post[]>([])
   const post = ref<Post | null>(null)
-  const totalPosts = ref(0) // total de posts que devuelve el backend
-  const pageSize = 10
-  const currentPage = ref(1)
+  const totalPosts = ref(0) // total number of posts returned by the backend
+  const currentPage = ref(1) // Current page synchronized with the query parameter "page"
 
-  const fetchPosts = async (page = 1): Promise<void> => {
+  const fetchAllPosts = async (page = 1, pageSize = 10): Promise<void> => {
     try {
       const res = await fetch(
-        `http://localhost:1337/api/posts?pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+        `${API_URL}/api/posts?pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
         {
-          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
           credentials: 'include',
         },
       )
@@ -37,7 +43,7 @@ export const usePostStore = defineStore('post', () => {
     payload: Omit<Post, 'id'>,
   ): Promise<{ success: boolean; message: string }> => {
     try {
-      const res = await fetch('http://localhost:1337/api/posts', {
+      const res = await fetch(`${API_URL}/api/posts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +54,7 @@ export const usePostStore = defineStore('post', () => {
       const data = await res.json()
       if (!res.ok) {
         console.log('Failed to create post.')
-        return { success: false, message: null }
+        return { success: false, message: '' }
       }
       post.value = data.data
         ? { ...data.data.attributes, id: data.data.id }
@@ -56,7 +62,29 @@ export const usePostStore = defineStore('post', () => {
       return { success: true, message: 'Post created successfully!' }
     } catch (err: any) {
       console.log('Failed to create post.')
-      return { success: false, message: null }
+      return { success: false, message: '' }
+    }
+  }
+
+  const fetchPostById = async (id: string | number) => {
+    try {
+      const res = await fetch(
+        `${API_URL}/api/posts/${id}?populate=*`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        },
+      )
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}`)
+      }
+      post.value = data.data
+    } catch (e: any) {
+      post.value = null
+      console.error('Error fetching post:', e)
     }
   }
 
@@ -64,9 +92,9 @@ export const usePostStore = defineStore('post', () => {
     post,
     posts,
     totalPosts,
-    pageSize,
     currentPage,
     createPost,
-    fetchPosts,
+    fetchAllPosts,
+    fetchPostById
   }
 })

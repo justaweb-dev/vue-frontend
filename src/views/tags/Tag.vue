@@ -5,22 +5,18 @@ import { HCard } from '@justawebdev/histoire-library'
 import { ref, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 
+/**
+ * API URL
+ */
+const API_URL = import.meta.env.VITE_API_URL
+
 const route = useRoute()
 const tag = ref<Tag | null>(null)
-const loading = ref(true)
-const error = ref('')
-const totalPosts = ref(0)
-const postsPerPage = 10
-
-// Página actual sincronizada con la query param "page"
-const currentPage = ref(1)
 
 async function fetchTag() {
-  loading.value = true
-  error.value = ''
   try {
     const res = await fetch(
-      `http://localhost:1337/api/tags/${route.params.id}?populate=*`,
+      `${API_URL}/api/tags/${route.params.id}?populate=*`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -28,7 +24,7 @@ async function fetchTag() {
         credentials: 'include',
       },
     )
-    
+
     const data = await res.json()
     console.log('Fetched tag data:', data)
 
@@ -39,10 +35,7 @@ async function fetchTag() {
     tag.value = { id: data.data.id, ...data.data }
   } catch (e) {
     console.error('Error loading tag:', e)
-    error.value = 'Error al cargar el tag.'
     tag.value = null
-  } finally {
-    loading.value = false
   }
 }
 
@@ -54,13 +47,7 @@ onMounted(async () => {
 <template>
   <DefaultLayout>
     <div class="container mx-auto p-4">
-      <div v-if="loading" class="text-center py-10 text-gray-500">
-        Loading tag...
-      </div>
-      <div v-else-if="error" class="text-center py-10 text-red-500">
-        {{ error }}
-      </div>
-      <div v-else-if="tag">
+      <div v-if="tag">
         <h1 class="text-3xl font-bold mb-8">{{ tag.name }}</h1>
         <div v-if="tag.posts.length">
           <h2 class="text-xl font-semibold mb-4">Posts with this tag:</h2>
@@ -86,7 +73,7 @@ onMounted(async () => {
                   <img
                     v-if="post.author?.avatar"
                     class="hidden object-cover w-10 h-10 mx-4 rounded-full sm:block"
-                    :src="`http://localhost:1337${post.author.avatar.url}`"
+                    :src="`${API_URL}/${post.author.avatar.url}`"
                     :alt="post.author.name"
                   />
                   <span class="font-bold text-gray-700 dark:text-gray-200">
@@ -103,12 +90,14 @@ onMounted(async () => {
                     Read more
                   </RouterLink>
                 </div>
-              </template>     
+              </template>
             </HCard>
           </div>
         </div>
       </div>
+      <div v-else class="text-center py-10 text-red-500">
+        Error loading tag data.
+      </div>
     </div>
   </DefaultLayout>
 </template>
-
