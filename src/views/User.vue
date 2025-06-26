@@ -225,7 +225,6 @@ watch(selectedImage, (newImage, _oldImage) => {
         label="Profile Picture"
         class-name="[&_label]:font-semibold"
         :allowed-files="'image/*'"
-        required
         @change="handleImageChange"
       />
       <HButton
