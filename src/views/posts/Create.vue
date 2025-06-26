@@ -4,8 +4,9 @@ import { usePostStore } from '@/stores/post'
 import { useTagStore } from '@/stores/tag'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { HButton, HInput } from '@justawebdev/histoire-library'
+import { HButton, HInput, HInputUpload } from '@justawebdev/histoire-library'
 import { storeToRefs } from 'pinia'
+import { useFileStore } from '@/stores/file'
 
 const postStore = usePostStore()
 const { createPost } = postStore
@@ -13,6 +14,9 @@ const tagStore = useTagStore()
 const { fetchAllTags } = tagStore
 const { tags } = storeToRefs(tagStore)
 const router = useRouter()
+const fileStore = useFileStore()
+const { uploadFile } = fileStore
+const selectedImage = ref<File | null>(null)
 
 const title = ref('')
 const body = ref('')
@@ -37,6 +41,18 @@ const slugify = (text: string) =>
 const handleCreate = async () => {
   error.value = ''
   success.value = ''
+  let mediaId = null
+  if (selectedImage.value) {
+    const uploaded = await uploadFile(selectedImage.value)
+    if (uploaded && typeof uploaded === 'object' && 'id' in uploaded) {
+      mediaId = uploaded.id
+    } else if (typeof uploaded === 'string') {
+      mediaId = uploaded
+    } else {
+      error.value = 'Image upload failed.'
+      return
+    }
+  }
   if (!title.value || !body.value) {
     error.value = 'Title and body are required.'
     return
@@ -47,6 +63,7 @@ const handleCreate = async () => {
     slug: slugify(title.value),
     tags: selectedTags.value,
     locale: 'en',
+    media: mediaId ? [mediaId] : [],
   }
   const result = await createPost(payload as any)
   if (result.success) {
@@ -63,7 +80,7 @@ const handleCreate = async () => {
     <div class="container mx-auto p-4 max-w-xl">
       <h1 class="text-3xl font-bold mb-6">Create Post</h1>
       <form @submit.prevent="handleCreate" class="flex flex-col gap-4">
-        <HInput v-model="title" label="Title" id="title" required />
+        <HInput v-model="title" class-name="[&_label]:font-semibold" label="Title" id="title" required />
         <label class="font-semibold">Body</label>
         <textarea v-model="body" id="body" rows="6" class="border rounded p-2" required />
         <label class="font-semibold">Tags</label>
@@ -72,6 +89,13 @@ const handleCreate = async () => {
             {{ tag.name }}
           </option>
         </select>
+        <HInputUpload
+          v-model="selectedImage"
+          class-name="[&_label]:font-semibold"
+          label="Upload Image"
+          id="image"
+          :allowed-files="'image/*'"
+        />
         <HButton label="Create Post" class-name="mt-4" />
         <div v-if="error" class="text-red-600 mt-2">{{ error }}</div>
         <div v-if="success" class="text-green-600 mt-2">{{ success }}</div>
