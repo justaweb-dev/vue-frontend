@@ -3,7 +3,7 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { usePostStore } from '@/stores/post'
 import { HTable, HPagination } from '@justawebdev/histoire-library'
 import { storeToRefs } from 'pinia'
-import { watch, onMounted } from 'vue'
+import { watch, onMounted, computed } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -30,6 +30,10 @@ watch(currentPage, async (newPage) => {
   router.replace({ query: { ...route.query, page: String(newPage) } })
   await fetchAllPosts(newPage, postsPerPage)
 })
+
+const postsSorted = computed(() => {
+  return [...posts.value].sort((a, b) => a.title.localeCompare(b.title))
+})
 </script>
 
 <template>
@@ -44,12 +48,12 @@ watch(currentPage, async (newPage) => {
           Create Post
         </RouterLink>
       </div>
-      <p v-if="posts.length === 0" class="mt-4 text-gray-500">
+      <p v-if="postsSorted.length === 0" class="mt-4 text-gray-500">
         No posts available.
       </p>
       <HTable
         v-model:current-page="currentPage"
-        :rows="posts"
+        :rows="postsSorted"
         :columns="[{ key: 'title', label: 'Title' }]"
         :rows-per-page="postsPerPage"
         :total-items="totalPosts"

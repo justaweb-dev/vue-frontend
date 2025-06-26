@@ -16,7 +16,7 @@ export const usePostStore = defineStore('post', () => {
   const fetchAllPosts = async (page = 1, pageSize = 10): Promise<void> => {
     try {
       const res = await fetch(
-        `${API_URL}/api/posts?pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*`,
+        `${API_URL}/api/posts?pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*&sort=title:asc`,
         {
           method: 'GET',
           headers: {
