@@ -18,14 +18,14 @@ const { currentPage, posts, totalPosts } = storeToRefs(postStore)
 
 const postsPerPage = 10
 
-// Lee la página actual del query param y hace fetch
+// Reads the current page from the query parameter and fetches posts
 onMounted(async () => {
   const pageFromQuery = parseInt(route.query.page as string)
   if (pageFromQuery && pageFromQuery > 0) currentPage.value = pageFromQuery
   await fetchAllPosts(currentPage.value, postsPerPage)
 })
 
-// Al cambiar currentPage, actualizamos URL y hacemos fetch
+// When currentPage changes, update the URL and fetch posts
 watch(currentPage, async (newPage) => {
   router.replace({ query: { ...route.query, page: String(newPage) } })
   await fetchAllPosts(newPage, postsPerPage)
