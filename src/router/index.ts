@@ -56,6 +56,11 @@ const routes = [
     name: 'tag',
     component: () => import('@/views/tags/Tag.vue'),
   },
+  {
+    path: '/posts/create',
+    name: 'create-post',
+    component: () => import('@/views/posts/Create.vue'),
+  },
 ]
 
 const router = createRouter({

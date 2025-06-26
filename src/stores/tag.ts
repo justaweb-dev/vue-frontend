@@ -7,6 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL
 export const useTagStore = defineStore('tag', () => {
   const tag = ref<Tag | null>(null)
   const tagPosts = ref<any[]>([])
+  const tags = ref<Tag[]>([])
 
   const fetchTagById = async (id: string | number) => {
     try {
@@ -31,9 +32,30 @@ export const useTagStore = defineStore('tag', () => {
     }
   }
 
+  const fetchAllTags = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/tags?populate=*`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      })
+      
+      const data = await res.json()
+      if (!res.ok) throw new Error('Error fetching tags')
+      tags.value = data.data.map((t: any) => ({ id: t.id, ...t }))
+    } catch (e) {
+      tags.value = []
+      console.error('Failed to fetch tags:', e)
+    }
+  }
+
   return {
     tag,
     tagPosts,
+    tags,
     fetchTagById,
+    fetchAllTags,
   }
 })

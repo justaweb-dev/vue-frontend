@@ -35,7 +35,15 @@ watch(currentPage, async (newPage) => {
 <template>
   <DefaultLayout>
     <div class="container mx-auto p-4">
-      <h1 class="text-2xl font-bold mb-4">Posts</h1>
+      <div class="flex flex-row justify-between items-center mb-4">
+        <h1 class="text-3xl font-bold">Posts</h1>
+        <RouterLink
+          to="/posts/create"
+          class="bg-sky-600 text-white px-4 py-2 rounded hover:bg-sky-700"
+        >
+          Create Post
+        </RouterLink>
+      </div>
       <p v-if="posts.length === 0" class="mt-4 text-gray-500">
         No posts available.
       </p>
