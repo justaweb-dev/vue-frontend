@@ -60,7 +60,7 @@ const handleLogout = async () => {
 
 <template>
   <div
-    class="h-full min-h-screen w-full bg-zinc-100 text-black dark:bg-zinc-900 dark:text-white"
+    class="h-full min-h-screen w-full bg-zinc-100 text-black dark:bg-zinc-900! dark:text-white"
   >
     <HNavbar :menu="menuList">
       <template #logo>

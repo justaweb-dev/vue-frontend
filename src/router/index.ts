@@ -59,7 +59,12 @@ const routes = [
   {
     path: '/posts/create',
     name: 'create-post',
-    component: () => import('@/views/posts/Create.vue'),
+    component: () => import('@/views/posts/Create_Edit.vue'),
+  },
+  {
+    path: '/posts/edit/:id',
+    name: 'edit-post',
+    component: () => import('@/views/posts/Create_Edit.vue'),
   },
 ]
 

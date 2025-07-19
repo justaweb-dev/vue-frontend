@@ -6,6 +6,7 @@ export interface User {
 }
 
 export interface Post {
+  id: number
   documentId: string
   title: string
   slug: string
@@ -14,7 +15,7 @@ export interface Post {
   media?: Media
   locale: string
   localizations?: (string | number)[]
-  user_permissions_user: number
+  users_permissions_user: User
 }
 
 export interface Media {
