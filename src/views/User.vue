@@ -169,24 +169,24 @@ watch(selectedImage, (newImage, _oldImage) => {
 <template>
   <DefaultLayout>
     <div
-      class="max-w-lg mx-auto flex flex-col p-8 bg-white dark:bg-gray-800 rounded shadow gap-4 mt-12"
+      class="max-w-lg mx-auto flex flex-col p-8 bg-white dark:bg-zinc-800 rounded shadow gap-4 mt-12"
     >
-      <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+      <h1 class="text-2xl font-bold mb-6 text-zinc-800 dark:text-white">
         User Profile
       </h1>
       <div>
-        <span class="block text-gray-700 dark:text-gray-200 font-semibold"
+        <span class="block text-zinc-700 dark:text-zinc-200 font-semibold"
           >Username:</span
         >
-        <span class="block text-gray-900 dark:text-white">{{
+        <span class="block text-zinc-900 dark:text-white">{{
           user.username
         }}</span>
       </div>
       <div>
-        <span class="block text-gray-700 dark:text-gray-200 font-semibold"
+        <span class="block text-zinc-700 dark:text-zinc-200 font-semibold"
           >Email:</span
         >
-        <span class="block text-gray-900 dark:text-white">{{
+        <span class="block text-zinc-900 dark:text-white">{{
           user.email
         }}</span>
       </div>
@@ -201,7 +201,7 @@ watch(selectedImage, (newImage, _oldImage) => {
         />
       </div>
       <div v-if="user.image" class="mt-6 flex flex-col gap-2">
-        <span class="text-gray-700 dark:text-gray-200 font-semibold"
+        <span class="text-zinc-700 dark:text-zinc-200 font-semibold"
           >Profile Picture</span
         >
         <div class="flex gap-2 items-start">

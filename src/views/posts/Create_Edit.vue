@@ -127,9 +127,9 @@ const handleCreateOrEdit = async () => {
       <form @submit.prevent="handleCreateOrEdit" class="flex flex-col gap-4">
         <HInput v-model="title" class-name="[&_label]:font-semibold" label="Title" id="title" required />
         <label class="font-semibold">Body</label>
-        <textarea v-model="body" id="body" rows="6" class="block w-full px-4 py-2 mt-2 text-gray-800 bg-zinc-100 border border-gray-400 rounded-md dark:border-gray-600 focus:border-sky-400 focus:ring-sky-300 focus:ring-opacity-40 dark:focus:border-sky-300 focus:outline-none focus:ring disabled:cursor-not-allowed disabled:opacity-50" required />
+        <textarea v-model="body" id="body" rows="6" class="block w-full px-4 py-2 mt-2 text-zinc-800 bg-zinc-100 border border-zinc-400 rounded-md dark:border-zinc-600 focus:border-emerald-400 focus:ring-emerald-300 focus:ring-opacity-40 dark:focus:border-emerald-300 focus:outline-none focus:ring disabled:cursor-not-allowed disabled:opacity-50" required />
         <label class="font-semibold">Tags</label>
-        <select v-model="selectedTags" multiple class="block w-full px-4 py-2 mt-2 text-gray-800 bg-zinc-100 border border-gray-400 rounded-md dark:border-gray-600 focus:border-sky-400 focus:ring-sky-300 focus:ring-opacity-40 dark:focus:border-sky-300 focus:outline-none focus:ring disabled:cursor-not-allowed disabled:opacity-50">
+        <select v-model="selectedTags" multiple class="block w-full px-4 py-2 mt-2 text-zinc-800 bg-zinc-100 border border-zinc-400 rounded-md dark:border-zinc-600 focus:border-emerald-400 focus:ring-emerald-300 focus:ring-opacity-40 dark:focus:border-emerald-300 focus:outline-none focus:ring disabled:cursor-not-allowed disabled:opacity-50">
           <option v-for="tag in tags" :key="tag.id" :value="tag.id">
             {{ tag.name }}
           </option>

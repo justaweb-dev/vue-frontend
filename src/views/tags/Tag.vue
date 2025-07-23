@@ -50,7 +50,7 @@ onMounted(async () => {
               <template #title>
                 <RouterLink
                   :to="`/posts/${post.documentId}`"
-                  class="text-xl font-bold text-gray-700 dark:text-white hover:text-gray-600 dark:hover:text-gray-200 hover:underline"
+                  class="text-xl font-bold text-zinc-700 dark:text-white hover:text-zinc-600 dark:hover:text-zinc-200 hover:underline"
                 >
                   {{ post.title }}
                 </RouterLink>
@@ -63,7 +63,7 @@ onMounted(async () => {
                     :src="`${API_URL}/${post.author.avatar.url}`"
                     :alt="post.author.name"
                   />
-                  <span class="font-bold text-gray-700 dark:text-gray-200">
+                  <span class="font-bold text-zinc-700 dark:text-zinc-200">
                     {{ post.author?.name || 'Unknown Author' }}
                   </span>
                 </div>
@@ -72,7 +72,7 @@ onMounted(async () => {
                 <div class="flex items-center justify-between mt-4">
                   <RouterLink
                     :to="`/posts/${post.documentId}`"
-                    class="text-sky-600 dark:text-sky-400 hover:underline"
+                    class="text-emerald-600 dark:text-emerald-400 hover:underline"
                   >
                     Read more
                   </RouterLink>

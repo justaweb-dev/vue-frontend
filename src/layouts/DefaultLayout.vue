@@ -60,7 +60,7 @@ const handleLogout = async () => {
 
 <template>
   <div
-    class="h-full min-h-screen w-full bg-zinc-100 text-black dark:bg-zinc-900! dark:text-white"
+    class="h-full min-h-screen w-full bg-zinc-100 text-black dark:bg-zinc-700! dark:text-white"
   >
     <HNavbar :menu="menuList">
       <template #logo>
@@ -72,14 +72,14 @@ const handleLogout = async () => {
         <li v-for="item in menuList" :key="item.label">
           <RouterLink
             :to="item.path"
-            class="text-gray-700 transition hover:text-sky-500 dark:text-gray-200 dark:hover:text-sky-400"
+            class="text-zinc-700 transition hover:text-emerald-500 dark:text-zinc-200 dark:hover:text-emerald-400"
           >
             {{ item.label }}
           </RouterLink>
         </li>
         <li>
           <FontAwesomeIcon
-            class="cursor-pointer text-gray-700 dark:text-white"
+            class="cursor-pointer text-zinc-700 dark:text-white"
             :icon="isDark ? faSun : faMoon"
             @click="toggleDark()"
           />

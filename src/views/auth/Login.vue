@@ -81,9 +81,9 @@ const handleResetPassword = async () => {
 <template>
   <DefaultLayout>
     <div
-      class="max-w-md mx-auto mt-12 p-8 bg-white dark:bg-gray-800 rounded shadow"
+      class="max-w-md mx-auto mt-12 p-8 bg-white dark:bg-zinc-800 rounded shadow"
     >
-      <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+      <h1 class="text-2xl font-bold mb-6 text-zinc-800 dark:text-white">
         Login
       </h1>
       <form @submit.prevent="handleLogin" class="space-y-4">

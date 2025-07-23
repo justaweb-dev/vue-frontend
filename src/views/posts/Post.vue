@@ -75,7 +75,7 @@ onMounted(async () => {
           <RouterLink
             v-for="tag in post.tags"
             :key="typeof tag === 'object' ? (tag as any).id : tag"
-            class="inline-block bg-sky-100 text-sky-700 rounded px-2 py-1 mr-2 text-xs"
+            class="inline-block bg-emerald-100 text-emerald-700 rounded px-2 py-1 mr-2 text-xs"
             :to="typeof tag === 'object' ? `/tags/${(tag as any).documentId}` : '#'"
           >{{ typeof tag === 'object' ? (tag as any).name : tag }}</RouterLink>
         </div>

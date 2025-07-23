@@ -43,12 +43,12 @@ const postsSorted = computed(() => {
         <h1 class="text-3xl font-bold">Posts</h1>
         <RouterLink
           to="/posts/create"
-          class="bg-sky-600 text-white px-4 py-2 rounded hover:bg-sky-700"
+          class="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700"
         >
           Create Post
         </RouterLink>
       </div>
-      <p v-if="postsSorted.length === 0" class="mt-4 text-gray-500">
+      <p v-if="postsSorted.length === 0" class="mt-4 text-zinc-500">
         No posts available.
       </p>
       <HTable
@@ -61,7 +61,7 @@ const postsSorted = computed(() => {
         <template #cell-title="{ value, row }">
           <RouterLink
             :to="`/posts/${row.documentId}`"
-            class="font-bold text-sky-700 hover:underline"
+            class="font-bold text-emerald-700 hover:underline"
           >
             <pre>{{ row.title }}</pre>
           </RouterLink>
