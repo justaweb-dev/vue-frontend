@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@justawebdev/histoire-library': link:../../../Library/pnpm/global/5/node_modules/@justawebdev/histoire-library
+  '@justawebdev/histoire-library': link:../../Library/pnpm/global/5/node_modules/@justawebdev/histoire-library
 
 importers:
 
@@ -24,8 +24,8 @@ importers:
         specifier: ^3.0.8
         version: 3.0.8(@fortawesome/fontawesome-svg-core@6.7.2)(vue@3.5.17(typescript@5.8.3))
       '@justawebdev/histoire-library':
-        specifier: link:../../../Library/pnpm/global/5/node_modules/@justawebdev/histoire-library
-        version: link:../../../Library/pnpm/global/5/node_modules/@justawebdev/histoire-library
+        specifier: link:../../Library/pnpm/global/5/node_modules/@justawebdev/histoire-library
+        version: link:../../Library/pnpm/global/5/node_modules/@justawebdev/histoire-library
       '@tailwindcss/vite':
         specifier: ^4.1.10
         version: 4.1.10(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1))
