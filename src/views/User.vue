@@ -12,7 +12,7 @@ import {
   HInput,
   HInputUpload,
   HModal,
-} from '@justawebdev/histoire-library'
+} from '@justaweb-dev/histoire-library'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch } from 'vue'
 

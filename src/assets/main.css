@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import 'tailwindcss' important;
 
 /**
 If you want your dark theme to be driven by a CSS selector instead of the prefers-color-scheme media query, override the dark variant to use your custom selector.

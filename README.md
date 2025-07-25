@@ -23,7 +23,7 @@ This application is a starter template for building modern web apps with authent
 - **Vue Router**: File-based routing for easy navigation.
 - **Tailwind CSS**: Utility-first CSS framework for rapid UI development.
 - **Dark Mode**: Easily toggle dark mode using the `.dark` class.
-- **Component Library Integration**: Ready to use external libraries like `@justawebdev/histoire-library`.
+- **Component Library Integration**: Ready to use external libraries like `@justaweb-dev/histoire-library`.
 - **Accessible Design**: Color palette and components optimized for accessibility.
 - **Authentication**: Login, registration, and email verification with Strapi backend.
 
@@ -66,19 +66,19 @@ This means you can toggle dark mode by adding or removing the `dark` class on th
 
 ## Using Component Libraries
 
-This project is set up to consume external Vue component libraries, such as [`@justawebdev/histoire-library`](https://github.com/justaweb-dev/histoire-library):
+This project is set up to consume external Vue component libraries, such as [`@justaweb-dev/histoire-library`](https://github.com/justaweb-dev/histoire-library):
 
 - Install or link the library (see their README for details).
 - Import the library's CSS in your [`src/main.ts`](src/main.ts):
 
   ```ts
-  import '@justawebdev/histoire-library/dist/histoire-comp-lib.css'
+  import '@justaweb-dev/histoire-library/dist/histoire-comp-lib.css'
   ```
 
 - Import and use components as needed:
 
   ```ts
-  import { HButton } from '@justawebdev/histoire-library'
+  import { HButton } from '@justaweb-dev/histoire-library'
   ```
 
 ---

@@ -2,7 +2,7 @@
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
-import { HButton, HInput } from '@justawebdev/histoire-library'
+import { HButton, HInput } from '@justaweb-dev/histoire-library'
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 

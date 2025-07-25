@@ -3,7 +3,7 @@ import router from '@/router'
 import { useUserStore } from '@/stores/user'
 import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { HButton, HNavbar, type ImageType } from '@justawebdev/histoire-library'
+import { HButton, HNavbar, type ImageType } from '@justaweb-dev/histoire-library'
 import { useDark, useToggle } from '@vueuse/core'
 import { computed, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
@@ -60,7 +60,7 @@ const handleLogout = async () => {
 
 <template>
   <div
-    class="h-full min-h-screen w-full bg-zinc-100 text-black dark:bg-zinc-700! dark:text-white"
+    class="h-full min-h-screen w-full text-black bg-zinc-150 dark:bg-zinc-700! dark:text-white"
   >
     <HNavbar :menu="menuList">
       <template #logo>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import { HButton } from '@justawebdev/histoire-library'
+import { HButton } from '@justaweb-dev/histoire-library'
 import { RouterLink } from 'vue-router'
 </script>
 

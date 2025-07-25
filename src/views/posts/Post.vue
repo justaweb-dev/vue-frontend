@@ -6,7 +6,7 @@ import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { computed } from 'vue'
-import { HButton } from '@justawebdev/histoire-library'
+import { HButton } from '@justaweb-dev/histoire-library'
 import { VueMarkdownIt } from '@f3ve/vue-markdown-it'
 
 /**

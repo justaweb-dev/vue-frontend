@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { useUserStore } from '@/stores/user'
-import { HButton, HHero, type ImageType } from '@justawebdev/histoire-library'
+import { HButton, HHero, type ImageType } from '@justaweb-dev/histoire-library'
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 

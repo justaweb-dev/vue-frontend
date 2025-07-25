@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { useTagStore } from '@/stores/tag'
-import { HCard, HPagination } from '@justawebdev/histoire-library'
+import { HCard, HPagination } from '@justaweb-dev/histoire-library'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'

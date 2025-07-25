@@ -1,7 +1,7 @@
 import App from './App.vue'
 import './assets/main.css'
 import router from './router'
-import '@justawebdev/histoire-library/dist/histoire-comp-lib.css'
+import '@justaweb-dev/histoire-library/dist/histoire-comp-lib.css'
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 

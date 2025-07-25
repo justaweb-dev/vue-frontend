@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { usePostStore } from '@/stores/post'
-import { HTable, HPagination } from '@justawebdev/histoire-library'
+import { HTable, HPagination } from '@justaweb-dev/histoire-library'
 import { storeToRefs } from 'pinia'
 import { watch, onMounted, computed } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
