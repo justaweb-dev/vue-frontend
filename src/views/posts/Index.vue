@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { usePostStore } from '@/stores/post'
-import { HTable, HPagination } from '@justaweb-dev/histoire-library'
+import { useUserStore } from '@/stores/user'
+import { HTable, HPagination, HButton } from '@justaweb-dev/histoire-library'
 import { storeToRefs } from 'pinia'
 import { watch, onMounted, computed } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -13,26 +14,39 @@ const router = useRouter()
  * Stores
  */
 const postStore = usePostStore()
+const userStore = useUserStore()
 const { fetchAllPosts } = postStore
+const { token } = storeToRefs(userStore)
+const {loadToken} = userStore
 const { currentPage, posts, totalPosts } = storeToRefs(postStore)
 
 const postsPerPage = 10
 
+const postsSorted = computed(() => {
+  return [...posts.value].sort((a, b) => a.title.localeCompare(b.title))
+})
+
 // Reads the current page from the query parameter and fetches posts
 onMounted(async () => {
+  if (!token.value) { 
+    loadToken() 
+  } 
   const pageFromQuery = parseInt(route.query.page as string)
   if (pageFromQuery && pageFromQuery > 0) currentPage.value = pageFromQuery
-  await fetchAllPosts(currentPage.value, postsPerPage)
+  if (token.value) {
+    await fetchAllPosts(currentPage.value, postsPerPage, token.value)
+  }
 })
 
 // When currentPage changes, update the URL and fetch posts
 watch(currentPage, async (newPage) => {
   router.replace({ query: { ...route.query, page: String(newPage) } })
-  await fetchAllPosts(newPage, postsPerPage)
-})
-
-const postsSorted = computed(() => {
-  return [...posts.value].sort((a, b) => a.title.localeCompare(b.title))
+  if (!token.value) { 
+    loadToken()
+  }
+  if (token.value) {
+    await fetchAllPosts(newPage, postsPerPage, token.value)
+  }
 })
 </script>
 
@@ -43,12 +57,11 @@ const postsSorted = computed(() => {
         <h1 class="text-3xl font-bold">Posts</h1>
         <RouterLink
           to="/posts/create"
-          class="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700"
         >
-          Create Post
+          <HButton label="Create Post" />
         </RouterLink>
       </div>
-      <p v-if="postsSorted.length === 0" class="mt-4 text-zinc-500">
+      <p v-if="posts.length === 0" class="mt-4 text-zinc-500">
         No posts available.
       </p>
       <HTable

@@ -2,18 +2,13 @@
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { useUserStore } from '@/stores/user'
 import { HButton, HHero, type ImageType } from '@justaweb-dev/histoire-library'
-import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
+import { storeToRefs } from 'pinia'
 
 /**
  * Stores
  */
 const userStore = useUserStore()
-
-/**
- * Computed variables
- */
-const user = computed(() => userStore.user)
+const { user } = storeToRefs(userStore)
 
 const image = {
   src: 'https://fastly.picsum.photos/id/3/5000/3333.jpg?hmac=GDjZ2uNWE3V59PkdDaOzTOuV3tPWWxJSf4fNcxu4S2g',
@@ -35,7 +30,7 @@ const image = {
         />
       </template>
       <template #cta>
-        <RouterLink :to="user && user.username ? '/user' : '/login'">
+        <RouterLink :to="user && user.username ? '/user' : '/login'" class="w-fit">
           <HButton label="Start now" />
         </RouterLink>
       </template>

@@ -27,7 +27,8 @@ const { fetchPostById } = postStore
 const { post } = storeToRefs(postStore)
 
 const userStore = useUserStore()
-const { user } = storeToRefs(userStore)
+const { user, token } = storeToRefs(userStore)
+const { loadToken } = userStore
 
 const isAuthor = computed(() => {
   if (!user.value || !post.value) return false
@@ -42,7 +43,14 @@ const isAuthor = computed(() => {
  * Lifecycle hooks
  */
 onMounted(async () => {
-  await fetchPostById(route.params.id as string)
+  // Ensure token and user are loaded from localStorage before fetching post
+  if (!token.value) { 
+    loadToken() 
+  } 
+  // Only call fetchPostById if token is present and is a string
+  if (token.value) {
+    await fetchPostById(route.params.id as string, token.value);
+  }
 })
 </script>
 
@@ -69,7 +77,7 @@ onMounted(async () => {
             class="rounded shadow max-h-64"
           />
         </div>
-        <vue-markdown-it :source="post.body" class="prose dark:prose-invert pt-4 pb-8 *:mb-4" />
+        <vue-markdown-it :source="typeof post.body === 'string' ? post.body : ''" class="prose dark:prose-invert pt-4 pb-8 *:mb-4" />
         <!-- <div class="prose dark:prose-invert mb-4" v-html="post.body"></div> -->
         <div v-if="Array.isArray(post.tags) && post.tags.length" class="mt-4">
           <RouterLink

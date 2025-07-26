@@ -9,6 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null)
+  const token = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!user.value)
   const username = computed(() => user.value?.username ?? '')
@@ -18,15 +19,32 @@ export const useUserStore = defineStore('user', () => {
     user.value = userData
   }
 
-  const clearCurrentUser = () => {
-    user.value = null
+  const setToken = (jwt: string) => {
+    token.value = jwt
+    localStorage.setItem('jwt', jwt)
   }
 
-  const getCurrentUser = async (): Promise<User | null> => {
+  const clearCurrentUser = () => {
+    user.value = null
+    token.value = null
+    localStorage.removeItem('jwt')
+  }
+
+  const loadToken = () => {
+    const stored = localStorage.getItem('jwt')
+    if (stored) token.value = stored
+  }
+
+  const getCurrentUser = async (jwt?: string): Promise<User | null> => {
+    const authToken = jwt || token.value || localStorage.getItem('jwt')
+    if (!authToken) return null
     try {
       const res = await fetch(`${API_URL}/api/users/me?populate=*`, {
         method: 'GET',
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
       })
 
       if (res.status === 403) {
@@ -50,15 +68,16 @@ export const useUserStore = defineStore('user', () => {
   const updateUser = async (
     id: string,
     userUpdateData: User,
+    token: string
   ): Promise<{ success: boolean; message: string }> => {
     try {
       const res = await fetch(`${API_URL}/api/users/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(userUpdateData),
-        credentials: 'include',
       })
 
       if (!res.ok) {
@@ -85,7 +104,7 @@ export const useUserStore = defineStore('user', () => {
   const login = async (
     email: string,
     password: string,
-  ): Promise<{ success: boolean; message: string }> => {
+  ): Promise<{ success: boolean; message: string; token?: string }> => {
     try {
       const res = await fetch(`${API_URL}/api/auth/local`, {
         method: 'POST',
@@ -94,7 +113,6 @@ export const useUserStore = defineStore('user', () => {
           identifier: email,
           password: password,
         }),
-        credentials: 'include',
       })
 
       const data = await res.json()
@@ -106,18 +124,11 @@ export const useUserStore = defineStore('user', () => {
         }
       }
 
-      const resUser = await fetch(`${API_URL}/api/users/me?populate=*`, {
-        method: 'GET',
-        credentials: 'include',
-      })
-
-      if (!resUser.ok) {
-        return { success: false, message: 'Failed to fetch user data.' }
+      if (data.jwt) {
+        setToken(data.jwt)
       }
-
-      const dataUser = await resUser.json()
-      setCurrentUser(dataUser)
-      return { success: true, message: 'Login successful!' }
+      await getCurrentUser(data.jwt)
+      return { success: true, message: 'Login successful!', token: data.jwt }
     } catch (err) {
       return { success: false, message: 'An unexpected error occurred.' }
     }
@@ -127,7 +138,10 @@ export const useUserStore = defineStore('user', () => {
     try {
       await fetch(`${API_URL}/api/auth/local`, {
         method: 'DELETE',
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token.value}`,
+        },
       })
       clearCurrentUser()
     } catch (err) {
@@ -139,19 +153,20 @@ export const useUserStore = defineStore('user', () => {
     currentPassword: string,
     password: string,
     passwordConfirmation: string,
+    token: string
   ): Promise<{ success: boolean; message: string }> => {
     try {
       const res = await fetch(`${API_URL}/api/auth/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           currentPassword,
           password,
           passwordConfirmation,
-        }),
-        credentials: 'include',
+        })
       })
 
       if (!res.ok) {
@@ -178,7 +193,10 @@ export const useUserStore = defineStore('user', () => {
     try {
       const res = await fetch(`${API_URL}/api/users/${id}`, {
         method: 'DELETE',
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token.value}`,
+        },
       })
       if (!res.ok) {
         const errorData = await res.json()
@@ -267,11 +285,14 @@ export const useUserStore = defineStore('user', () => {
 
   return {
     user,
+    token,
     isAuthenticated,
     username,
     email,
     setCurrentUser,
+    setToken,
     clearCurrentUser,
+    loadToken,
     getCurrentUser,
     login,
     logout,

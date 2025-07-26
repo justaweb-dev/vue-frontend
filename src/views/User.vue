@@ -25,8 +25,8 @@ const API_URL = import.meta.env.VITE_API_URL
  * Stores
  */
 const userStore = useUserStore()
-const { user } = storeToRefs(userStore)
-const { getCurrentUser, updateUser, changePassword, deleteUser } = userStore
+const { user, token } = storeToRefs(userStore)
+const { getCurrentUser, updateUser, changePassword, deleteUser, loadToken } = userStore
 const fileStore = useFileStore()
 const { uploadFile, deleteFile } = fileStore
 
@@ -53,10 +53,11 @@ const { hasChanges, resetChanges } = useHasNonSavedChanges(user)
  * lifecycle hooks
  */
 onMounted(async () => {
-  if (user.value) {
-    originalUser.value = JSON.parse(JSON.stringify(user.value))
-  } else {
-    await getCurrentUser()
+  if (!token.value) { 
+    loadToken() 
+  } 
+  if (token.value) {
+    await getCurrentUser(token.value)
   }
 })
 
@@ -72,20 +73,20 @@ const handleImageChange = (e: Event) => {
 }
 
 const handleUserUpdate = async () => {
-  if (selectedImage.value && user.value) {
+  if (selectedImage.value && user.value && token.value) {
     isUploading.value = true
     try {
-      const uploadedImage = await uploadFile(selectedImage.value, {
+        const uploadedImage = await uploadFile(selectedImage.value, {
         ref: 'plugin::users-permissions.user',
         refId: user.value.id,
         field: 'image',
-      })
+      }, token.value)
       if (uploadedImage) {
         await updateUser(String(user.value.id), {
           ...user.value,
-          image: uploadedImage,
-        })
-        await getCurrentUser()
+          image: uploadedImage
+        }, token.value)
+        await getCurrentUser(token.value)
         hasChanges.value = false
         selectedImage.value = null
       }
@@ -94,17 +95,19 @@ const handleUserUpdate = async () => {
     } finally {
       isUploading.value = false
     }
+  } else {
+    console.error('Token is required to update user image.')
   }
 }
 
-const handleRemoveImage = async () => {
-  if (user.value && user.value.image) {
-    try {
-      await deleteFile(user.value.image.id)
-      await updateUser(String(user.value.id), { ...user.value, image: undefined })
-      await getCurrentUser()
-      showRemoveImageModal.value = false
 
+const handleRemoveImage = async () => {
+  if (user.value && token.value && user.value.image) {
+    try {
+      await deleteFile(user.value.image.id, token.value)
+      await updateUser(String(user.value.id), { ...user.value, image: undefined }, token.value)
+      await getCurrentUser(token.value)
+      showRemoveImageModal.value = false
       hasChanges.value = false
       selectedImage.value = null
     } catch (error) {
@@ -132,6 +135,7 @@ const handleChangePassword = async () => {
       currentPassword.value,
       password.value,
       passwordConfirmation.value,
+      token.value as string
     )
 
     showResetModal.value = false

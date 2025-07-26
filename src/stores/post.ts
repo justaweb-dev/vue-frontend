@@ -10,10 +10,11 @@ const API_URL = import.meta.env.VITE_API_URL
 export const usePostStore = defineStore('post', () => {
   const posts = ref<Post[]>([])
   const post = ref<Post | null>(null)
-  const totalPosts = ref(0) // total number of posts returned by the backend
-  const currentPage = ref(1) // Current page synchronized with the query parameter "page"
+  const totalPosts = ref(0) // total de posts que devuelve el backend
+  const pageSize = 10
+  const currentPage = ref(1)
 
-  const fetchAllPosts = async (page = 1, pageSize = 10): Promise<void> => {
+  const fetchAllPosts = async (page = 1, pageSize = 10, token: string): Promise<void> => {
     try {
       const res = await fetch(
         `${API_URL}/api/posts?pagination[page]=${page}&pagination[pageSize]=${pageSize}&populate=*&sort=title:asc`,
@@ -21,11 +22,12 @@ export const usePostStore = defineStore('post', () => {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-          },
-          credentials: 'include',
+            'Authorization': `Bearer ${token}`,
+          }
         },
       )
       const data = await res.json()
+      
       if (!res.ok) {
         posts.value = []
         totalPosts.value = 0
@@ -42,15 +44,16 @@ export const usePostStore = defineStore('post', () => {
 
   const createPost = async (
     payload: Omit<Post, 'id'>,
+    token: string
   ): Promise<{ success: boolean; message: string }> => {
     try {
       const res = await fetch(`${API_URL}/api/posts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ data: payload }),
-        credentials: 'include',
       })
       const data = await res.json()
       if (!res.ok) {
@@ -58,7 +61,7 @@ export const usePostStore = defineStore('post', () => {
         return { success: false, message: '' }
       }
       post.value = data.data
-        ? { ...data.data, id: data.data.id }
+        ? { ...data.data.attributes, id: data.data.id }
         : null
       return { success: true, message: 'Post created successfully!' }
     } catch (err: any) {
@@ -67,14 +70,14 @@ export const usePostStore = defineStore('post', () => {
     }
   }
 
-  const fetchPostById = async (id: string | number) => {
+  const fetchPostById = async (id: string | number, token: string) => {
     try {
       const res = await fetch(`${API_URL}/api/posts/${id}?populate=*`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        credentials: 'include',
       })
       const data = await res.json()
       if (!res.ok) {
@@ -90,15 +93,16 @@ export const usePostStore = defineStore('post', () => {
   const updatePost = async (
     id: string | number,
     payload: Partial<Post>,
+    token: string
   ): Promise<{ success: boolean; message: string }> => {
     try {
       const res = await fetch(`${API_URL}/api/posts/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ data: payload }),
-        credentials: 'include',
       })
       const data = await res.json()
       if (!res.ok) {
@@ -115,14 +119,23 @@ export const usePostStore = defineStore('post', () => {
     }
   }
 
+  /**
+   * Clear the current post state (set post to null)
+   */
+  const clearPost = () => {
+    post.value = null
+  }
+
   return {
     post,
     posts,
     totalPosts,
+    pageSize,
     currentPage,
     createPost,
     updatePost,
     fetchAllPosts,
     fetchPostById,
+    clearPost,
   }
 })

@@ -24,9 +24,11 @@ const router = useRouter()
 const route = useRoute()
 const fileStore = useFileStore()
 const { uploadFile } = fileStore
-const usersStore = useUserStore()
-const { user } = usersStore
+const userStore = useUserStore()
+const { user, token } = storeToRefs(userStore)
+const { loadToken } = userStore
 const selectedImages = ref<File[] | File | null>(null)
+const mediaIds = ref<(number | string)[]>([])
 
 const title = ref('')
 const body = ref('')
@@ -35,16 +37,30 @@ const error = ref('')
 const success = ref('')
 
 onMounted(async () => {
-  await fetchAllTags()
-  // Si es edición, cargar datos del post
-  if (route.params.id) {
-    await fetchPostById(route.params.id as string)
-    if (post.value) {
-      title.value = post.value.title
-      body.value = post.value.body
-      selectedTags.value = Array.isArray(post.value.tags)
-        ? post.value.tags.map((t: any) => typeof t === 'object' ? t.id : t)
-        : []
+  // Clear mediaIds at the start
+  mediaIds.value = []
+  // Clear post state if creating a new post
+  if (!route.params.id) {
+    postStore.clearPost()
+    title.value = ''
+    body.value = ''
+    selectedTags.value = []
+    selectedImages.value = null
+  }
+  if (!token.value) { 
+    loadToken() 
+  } 
+  if (token.value) {
+    await fetchAllTags(token.value!)
+    if (route.params.id) {
+      await fetchPostById(route.params.id as string, token.value!)
+      if (post.value) {
+        title.value = post.value.title
+        body.value = post.value.body
+        selectedTags.value = Array.isArray(post.value.tags)
+          ? post.value.tags.map((t: any) => typeof t === 'object' ? t.id : t)
+          : []
+      }
     }
   }
 })
@@ -62,8 +78,6 @@ const slugify = (text: string) =>
 const handleCreateOrEdit = async () => {
   error.value = ''
   success.value = ''
-  // Initialize an array to store media IDs
-  let mediaIds: (number | string)[] = []
 
   if (selectedImages.value) {
     const files = Array.isArray(selectedImages.value)
@@ -71,10 +85,10 @@ const handleCreateOrEdit = async () => {
       : [selectedImages.value]
 
     // Uploads all files in parallel.
-    const uploadedArr = await Promise.all(files.map(file => uploadFile(file)))
+    const uploadedArr = await Promise.all(files.map(file => uploadFile(file, {refId: post.value?.id || '', ref: 'post', field: 'media'}, token.value as string)))
 
     // Extract the IDs of the uploaded files
-    mediaIds = uploadedArr
+    mediaIds.value = uploadedArr
       .map(uploaded => {
         if (uploaded && typeof uploaded === 'object' && 'id' in uploaded) {
           return uploaded.id
@@ -85,7 +99,7 @@ const handleCreateOrEdit = async () => {
       })
       .filter(Boolean) as (number | string)[]
     
-    if (mediaIds.length === 0) {
+    if (mediaIds.value.length === 0) {
       error.value = 'Image upload failed.'
       return
     }
@@ -94,7 +108,7 @@ const handleCreateOrEdit = async () => {
     error.value = 'Title and body are required.'
     return
   }
-  const userId = user?.id
+  const userId = user.value?.id
   if (!userId) {
     error.value = 'You must be logged in to create or edit a post.'
     return
@@ -108,13 +122,13 @@ const handleCreateOrEdit = async () => {
     slug: slugify(title.value),
     tags: { set: tagsDocumentIds },
     locale: 'en',
-    media: mediaIds,
+    media: mediaIds.value,
     users_permissions_user: { set: userId },
   }
   // If editing, call updatePost; otherwise, call createPost
   if (route.params.id) {
     if (updatePost) {
-      const result = await updatePost(route.params.id as string, payload as any)
+      const result = await updatePost(route.params.id as string, payload as any, token.value!)
       if (result.success) {
         success.value = 'Post updated successfully!'
         setTimeout(() => router.push('/posts/' + route.params.id), 500)
@@ -123,7 +137,7 @@ const handleCreateOrEdit = async () => {
       }
     }
   } else {
-    const result = await createPost(payload as any)
+    const result = await createPost(payload as any, token.value!)
     if (result.success) {
       success.value = 'Post created successfully!'
       setTimeout(() => router.push('/posts'), 500)
@@ -143,7 +157,7 @@ const handleCreateOrEdit = async () => {
         <label class="font-semibold">Body</label>
         <textarea v-model="body" id="body" rows="6" class="block w-full px-4 py-2 mt-2 text-zinc-800 bg-zinc-100 border border-zinc-400 rounded-md dark:border-zinc-600 focus:border-emerald-400 focus:ring-emerald-300 focus:ring-opacity-40 dark:focus:border-emerald-300 focus:outline-none focus:ring disabled:cursor-not-allowed disabled:opacity-50" required />
         <label class="font-semibold">Tags</label>
-        <select v-model="selectedTags" multiple class="block w-full px-4 py-2 mt-2 text-zinc-800 bg-zinc-100 border border-zinc-400 rounded-md dark:border-zinc-600 focus:border-emerald-400 focus:ring-emerald-300 focus:ring-opacity-40 dark:focus:border-emerald-300 focus:outline-none focus:ring disabled:cursor-not-allowed disabled:opacity-50">
+        <select v-model="selectedTags" multiple class="block w-full h-auto min-h-20 px-4 py-2 mt-2 text-zinc-800 bg-zinc-100 border border-zinc-400 rounded-md dark:border-zinc-600 focus:border-emerald-400 focus:ring-emerald-300 focus:ring-opacity-40 dark:focus:border-emerald-300 focus:outline-none focus:ring disabled:cursor-not-allowed disabled:opacity-50">
           <option v-for="tag in tags" :key="tag.id" :value="tag.id">
             {{ tag.name }}
           </option>

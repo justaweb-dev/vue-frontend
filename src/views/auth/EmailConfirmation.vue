@@ -18,9 +18,11 @@ import { RouterLink } from 'vue-router'
       <p class="text-zinc-600 dark:text-zinc-300">
         You can now log in to your account.
       </p>
-      <RouterLink to="/login"
+      <div class="flex justify-center w-full">
+        <RouterLink to="/login" class="w-fit"
         ><HButton class="mt-4" label="login"
-      /></RouterLink>
+        /></RouterLink>
+      </div>
     </div>
   </DefaultLayout>
 </template>

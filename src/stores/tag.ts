@@ -9,15 +9,16 @@ export const useTagStore = defineStore('tag', () => {
   const tagPosts = ref<any[]>([])
   const tags = ref<Tag[]>([])
 
-  const fetchTagById = async (id: string | number) => {
+  const fetchTagById = async (id: string | number, token: string) => {
     try {
       const res = await fetch(`${API_URL}/api/tags/${id}?populate=*`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          }
+        }
+      )
       const data = await res.json()
       if (!res.ok) {
         throw new Error(`HTTP error! Status: ${res.status}`)
@@ -32,16 +33,18 @@ export const useTagStore = defineStore('tag', () => {
     }
   }
 
-  const fetchAllTags = async () => {
+  const fetchAllTags = async (token: string) => {
     try {
-      const res = await fetch(`${API_URL}/api/tags?populate=*`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
-      
+      const res = await fetch(`${API_URL}/api/tags?populate=*`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          }
+        }
+      )
+
       const data = await res.json()
       if (!res.ok) throw new Error('Error fetching tags')
       tags.value = data.data.map((t: any) => ({ id: t.id, ...t }))

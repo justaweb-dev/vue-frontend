@@ -9,8 +9,8 @@ import { useRoute } from 'vue-router'
 /**
  * Store
  */
-const usersStore = useUserStore()
-const { resetPassword } = usersStore
+const userStore = useUserStore()
+const { resetPassword } = userStore
 
 const password = ref('')
 const confirmPassword = ref('')

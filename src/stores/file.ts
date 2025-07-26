@@ -12,24 +12,27 @@ export const useFileStore = defineStore('file', () => {
 
   const uploadFile = async (
     file: File,
-    options?: {
+    options: {
       ref?: string
       refId?: string | number
       field?: string
     },
+    token: string
   ): Promise<any | null> => {
     try {
       const formData = new FormData()
       formData.append('files', file)
 
-      if (options?.ref) formData.append('ref', options.ref)
-      if (options?.refId) formData.append('refId', String(options.refId))
-      if (options?.field) formData.append('field', options.field)
+      if (options.ref) formData.append('ref', options.ref)
+      if (options.refId) formData.append('refId', String(options.refId))
+      if (options.field) formData.append('field', options.field)
 
       const res = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
         body: formData,
-        credentials: 'include',
+        headers: { 
+          Authorization: `Bearer ${token}` 
+        },
       })
 
       if (!res.ok) throw new Error('Upload failed.')
@@ -42,11 +45,11 @@ export const useFileStore = defineStore('file', () => {
     }
   }
 
-  const deleteFile = async (id: string | number): Promise<boolean> => {
+  const deleteFile = async (id: string | number, token: string): Promise<boolean> => {
     try {
       const res = await fetch(`${API_URL}/api/upload/files/${id}`, {
         method: 'DELETE',
-        credentials: 'include',
+        headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) throw new Error('Failed to delete file.')
 

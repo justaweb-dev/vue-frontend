@@ -6,11 +6,6 @@ import { HButton, HInput, HModal } from '@justaweb-dev/histoire-library'
 import { ref } from 'vue'
 
 /**
- * API URL
- */
-const API_URL = import.meta.env.VITE_API_URL
-
-/**
  * Stores
  */
 const userStore = useUserStore()

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { useTagStore } from '@/stores/tag'
+import { useUserStore } from '@/stores/user'
 import { HCard, HPagination } from '@justaweb-dev/histoire-library'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref } from 'vue'
@@ -15,6 +16,9 @@ const route = useRoute()
 const tagStore = useTagStore()
 const { fetchTagById } = tagStore
 const { tag, tagPosts } = storeToRefs(tagStore)
+const userStore = useUserStore()
+const { token } = storeToRefs(userStore)
+const {loadToken} = userStore
 
 const currentPage = ref(1)
 const rowsPerPage = 10
@@ -27,7 +31,13 @@ const paginatedPosts = computed(() => {
 })
 
 onMounted(async () => {
-  await fetchTagById(route.params.id as string)
+  if (!token.value) { 
+    loadToken() 
+  } 
+  // Fetch the tag by ID from the route parameters
+  if (route.params.id && token.value) {
+    await fetchTagById(route.params.id as string, token.value!)
+  }
 })
 </script>
 
