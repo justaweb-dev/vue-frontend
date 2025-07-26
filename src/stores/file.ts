@@ -17,7 +17,7 @@ export const useFileStore = defineStore('file', () => {
       refId?: string | number
       field?: string
     },
-  ): Promise<string | null> => {
+  ): Promise<any | null> => {
     try {
       const formData = new FormData()
       formData.append('files', file)

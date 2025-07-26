@@ -1,6 +1,6 @@
 import { ref, watch, isRef, toRaw, type Ref } from 'vue'
 
-export function useHasNonSavedChanges<T>(data: T | Ref<T>) {
+export function useHasNonSavedChanges<T extends object>(data: T | Ref<T>) {
   const rawInitial = ref<any>(cloneDeep(data))
   const hasChanges = ref(false)
 

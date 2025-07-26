@@ -42,3 +42,9 @@ export interface Tag {
   updatedAt: string
   publishedAt: string
 }
+
+export interface File {
+  id: number | string
+  url: string
+  [key: string]: any
+}

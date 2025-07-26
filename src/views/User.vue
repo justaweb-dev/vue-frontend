@@ -72,7 +72,7 @@ const handleImageChange = (e: Event) => {
 }
 
 const handleUserUpdate = async () => {
-  if (selectedImage.value) {
+  if (selectedImage.value && user.value) {
     isUploading.value = true
     try {
       const uploadedImage = await uploadFile(selectedImage.value, {
@@ -81,8 +81,8 @@ const handleUserUpdate = async () => {
         field: 'image',
       })
       if (uploadedImage) {
-        await updateUser(user.value.id, {
-          user: user.value,
+        await updateUser(String(user.value.id), {
+          ...user.value,
           image: uploadedImage,
         })
         await getCurrentUser()
@@ -98,10 +98,10 @@ const handleUserUpdate = async () => {
 }
 
 const handleRemoveImage = async () => {
-  if (user.value.image) {
+  if (user.value && user.value.image) {
     try {
       await deleteFile(user.value.image.id)
-      await updateUser(user.value.id, { ...user.value, image: null })
+      await updateUser(String(user.value.id), { ...user.value, image: undefined })
       await getCurrentUser()
       showRemoveImageModal.value = false
 
@@ -140,24 +140,42 @@ const handleChangePassword = async () => {
     passwordConfirmation.value = ''
   } catch (error) {
     console.error('Error changing password:', error)
-    alert(error.message)
+    if (error instanceof Error) {
+      if (error instanceof Error) {
+        alert(error.message)
+      } else {
+        alert('An unknown error occurred.')
+      }
+    } else {
+      console.error('An unknown error occurred:', error)
+    }
   }
 }
 
 const handleDeleteAccount = async () => {
   try {
-    await deleteUser(user.value.id)
+    if (user.value && user.value.id !== undefined) {
+      await deleteUser(String(user.value.id))
+    }
     showDeleteAccountModal.value = false
     // Redirect to home or login page after deletion
     router.push('/')
   } catch (error) {
     console.error('Error deleting account:', error)
-    alert(error.message)
+    if (error instanceof Error) {
+      if (error instanceof Error) {
+        alert(error.message)
+      } else {
+        alert('An unknown error occurred.')
+      }
+    } else {
+      console.error('An unknown error occurred:', error)
+    }
   }
 }
 
 watch(selectedImage, (newImage, _oldImage) => {
-  const hadNoImageBefore = user.value.image === null
+  const hadNoImageBefore = user.value?.image === null
   const hasNewImageNow = newImage !== null
 
   if (hadNoImageBefore && hasNewImageNow) {
@@ -179,7 +197,7 @@ watch(selectedImage, (newImage, _oldImage) => {
           >Username:</span
         >
         <span class="block text-zinc-900 dark:text-white">{{
-          user.username
+          user?.username || ''
         }}</span>
       </div>
       <div>
@@ -187,7 +205,7 @@ watch(selectedImage, (newImage, _oldImage) => {
           >Email:</span
         >
         <span class="block text-zinc-900 dark:text-white">{{
-          user.email
+          user?.email || ''
         }}</span>
       </div>
       <div class="flex flex-row gap-4 justify-between">
@@ -200,7 +218,7 @@ watch(selectedImage, (newImage, _oldImage) => {
           @click="() => (showDeleteAccountModal = true)"
         />
       </div>
-      <div v-if="user.image" class="mt-6 flex flex-col gap-2">
+      <div v-if="user && user.image" class="mt-6 flex flex-col gap-2">
         <span class="text-zinc-700 dark:text-zinc-200 font-semibold"
           >Profile Picture</span
         >
@@ -225,6 +243,7 @@ watch(selectedImage, (newImage, _oldImage) => {
         label="Profile Picture"
         class-name="[&_label]:font-semibold"
         :allowed-files="'image/*'"
+        v-model="selectedImage as any"
         @change="handleImageChange"
       />
       <HButton

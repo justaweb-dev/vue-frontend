@@ -26,7 +26,7 @@ const fileStore = useFileStore()
 const { uploadFile } = fileStore
 const usersStore = useUserStore()
 const { user } = usersStore
-const selectedImage = ref<File | null>(null)
+const selectedImages = ref<File[] | File | null>(null)
 
 const title = ref('')
 const body = ref('')
@@ -62,15 +62,30 @@ const slugify = (text: string) =>
 const handleCreateOrEdit = async () => {
   error.value = ''
   success.value = ''
-  let mediaId = null
-  if (selectedImage.value) {
-    const file = selectedImage.value
-    const uploaded = await uploadFile(file)
-    if (uploaded && typeof uploaded === 'object' && 'id' in uploaded) {
-      mediaId = uploaded.id
-    } else if (typeof uploaded === 'string') {
-      mediaId = uploaded
-    } else {
+  // Initialize an array to store media IDs
+  let mediaIds: (number | string)[] = []
+
+  if (selectedImages.value) {
+    const files = Array.isArray(selectedImages.value)
+      ? selectedImages.value
+      : [selectedImages.value]
+
+    // Uploads all files in parallel.
+    const uploadedArr = await Promise.all(files.map(file => uploadFile(file)))
+
+    // Extract the IDs of the uploaded files
+    mediaIds = uploadedArr
+      .map(uploaded => {
+        if (uploaded && typeof uploaded === 'object' && 'id' in uploaded) {
+          return uploaded.id
+        } else if (typeof uploaded === 'string') {
+          return uploaded
+        }
+        return null
+      })
+      .filter(Boolean) as (number | string)[]
+    
+    if (mediaIds.length === 0) {
       error.value = 'Image upload failed.'
       return
     }
@@ -93,12 +108,11 @@ const handleCreateOrEdit = async () => {
     slug: slugify(title.value),
     tags: { set: tagsDocumentIds },
     locale: 'en',
-    media: mediaId ? [mediaId] : [],
+    media: mediaIds,
     users_permissions_user: { set: userId },
   }
-  // Si es edición, llamar a updatePost, si no, createPost
+  // If editing, call updatePost; otherwise, call createPost
   if (route.params.id) {
-    // Falta implementar updatePost en el store
     if (updatePost) {
       const result = await updatePost(route.params.id as string, payload as any)
       if (result.success) {
@@ -135,7 +149,7 @@ const handleCreateOrEdit = async () => {
           </option>
         </select>
         <pre>post: {{ post }}</pre>
-        <div v-if="post?.media?.length > 0" class="mt-6 flex flex-col gap-2">
+        <div v-if="Array.isArray(post?.media) && post.media.length > 0" class="mt-6 flex flex-col gap-2">
           <div class="flex gap-2 items-start">
             <img
               :src="API_URL + post.media[0].url"
@@ -153,7 +167,8 @@ const handleCreateOrEdit = async () => {
         </div>
         <HInputUpload
           v-else
-          v-model="selectedImage"
+          v-model="selectedImages as any"
+          :multiple="true"
           id="post-image-upload"
           label="Upload Image"
           class-name="[&_label]:font-semibold"
