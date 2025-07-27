@@ -54,11 +54,33 @@ export const useTagStore = defineStore('tag', () => {
     }
   }
 
+  const createTag = async (name: string, token: string): Promise<Tag | null> => {
+    try {
+      const res = await fetch(`${API_URL}/api/tags`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ data: { name } }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error?.message || 'Error creating tag')
+      const newTag = { id: data.data.id, ...data.data.attributes }
+      tags.value.push(newTag)
+      return newTag
+    } catch (e) {
+      console.error('Failed to create tag:', e)
+      return null
+    }
+  }
+
   return {
     tag,
     tagPosts,
     tags,
     fetchTagById,
     fetchAllTags,
+    createTag,
   }
 })
