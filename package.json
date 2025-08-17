@@ -18,7 +18,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
-    "@justaweb-dev/histoire-library": "^1.0.5",
+    "@justaweb-dev/histoire-library": "^1.0.6",
     "@tailwindcss/vite": "^4.1.10",
     "@vueuse/core": "^13.4.0",
     "pinia": "^3.0.1",

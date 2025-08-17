@@ -191,7 +191,7 @@ watch(selectedImage, (newImage, _oldImage) => {
 <template>
   <DefaultLayout>
     <div
-      class="max-w-lg mx-auto flex flex-col p-8 bg-white dark:bg-zinc-800 rounded shadow gap-4 mt-12"
+      class="max-w-lg mx-auto flex flex-col p-8 bg-white dark:bg-slate-900/50 rounded shadow gap-4 mt-12"
     >
       <h1 class="text-2xl font-bold mb-6 text-zinc-800 dark:text-white">
         User Profile

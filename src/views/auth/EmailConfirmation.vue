@@ -7,7 +7,7 @@ import { RouterLink } from 'vue-router'
 <template>
   <DefaultLayout>
     <div
-      class="flex flex-col gap-4 max-w-md mx-auto mt-12 p-8 bg-white dark:bg-zinc-800 rounded shadow text-center"
+      class="flex flex-col gap-4 max-w-md mx-auto mt-12 p-8 bg-white dark:bg-slate-900/50 rounded shadow text-center"
     >
       <h1 class="text-2xl font-bold mb-4 text-zinc-800 dark:text-white">
         Email confirmed

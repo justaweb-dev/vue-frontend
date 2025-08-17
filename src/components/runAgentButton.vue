@@ -15,26 +15,35 @@ async function runAgent() {
   message.value = 'Starting AI Agent...'
   
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ai-agent/run`, {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337'
+    console.log('🤖 Calling AI Agent API at:', `${apiUrl}/api/ai-agent/run`)
+    
+    const res = await fetch(`${apiUrl}/api/ai-agent/run`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json'
       }
     })
     
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+    }
+    
     const data = await res.json()
+    console.log('AI Agent response:', data)
     
     if (data.success) {
       status.value = 'success'
-      message.value = 'AI Agent completed successfully! New post created and published.'
+      message.value = data.message || 'AI Agent completed successfully! New post created and published.'
     } else {
       status.value = 'error'
-      message.value = data.message || 'AI Agent execution failed'
+      message.value = data.error || data.message || 'AI Agent execution failed'
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error executing AI agent:', err)
     status.value = 'error'
-    message.value = 'Failed to execute AI Agent. Please try again.'
+    message.value = `Failed to execute AI Agent: ${err?.message || 'Unknown error'}`
   } finally {
     isRunning.value = false
     // Clear message after 5 seconds
@@ -59,12 +68,22 @@ const buttonLabel = computed(() => {
 const statusMessageClass = computed(() => {
   return status.value
 })
+
+const buttonClass = computed(() => {
+  const baseClasses = 'btn-modern transition-all duration-300 shadow-lg'
+  switch (status.value) {
+    case 'running': return `${baseClasses} bg-amber-500 hover:bg-amber-600 text-white animate-pulse`
+    case 'success': return `${baseClasses} bg-emerald-500 hover:bg-emerald-600 text-white`
+    case 'error': return `${baseClasses} bg-red-500 hover:bg-red-600 text-white`
+    default: return `${baseClasses} bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white`
+  }
+})
 </script>
 
 <template>
   <div class="ai-agent-container">
     <HButton
-      class="run-agent-button"
+      :class="buttonClass"
       @click="runAgent"
       :label="buttonLabel"
       :disabled="isRunning"

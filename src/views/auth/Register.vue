@@ -48,7 +48,7 @@ const handleRegister = async () => {
 <template>
   <DefaultLayout>
     <div
-      class="max-w-md mx-auto mt-12 p-8 bg-white dark:bg-zinc-800 rounded shadow"
+      class="max-w-md mx-auto mt-12 p-8 bg-white dark:bg-slate-900/50 rounded shadow"
     >
       <div
         v-if="success"
