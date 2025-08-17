@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import RunAgentButton from '@/components/runAgentButton.vue'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
 import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
@@ -63,12 +64,21 @@ const handleLogout = async () => {
     class="h-full min-h-screen w-full text-black bg-zinc-150 dark:bg-zinc-700! dark:text-white"
   >
     <HNavbar :menu="menuList">
-      <template #logo>
-        <RouterLink :to="user && user.username ? '/user' : '/'"
-          ><img :src="logo.src" :alt="logo.alt" class="h-8 w-auto" />
+       <template #logo>
+        <RouterLink 
+          :to="user && user.username ? '/user' : '/'"
+          class="flex items-center space-x-2 text-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent hover:from-emerald-600 hover:to-teal-600 transition-all duration-300"
+        >
+          <div class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-sm">JW</span>
+          </div>
+          <span>JustAWebDev</span>
         </RouterLink>
       </template>
       <template #menuList>
+        <!-- <li>
+          <RunAgentButton />
+        </li> -->
         <li v-for="item in menuList" :key="item.label">
           <RouterLink
             :to="item.path"

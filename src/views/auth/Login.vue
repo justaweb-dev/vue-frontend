@@ -25,7 +25,14 @@ const showResetModal = ref(false)
  * Methods
  */
 const validateEmail = (email: string) => {
-  return /\S+@\S+\.\S+/.test(email)
+  // More robust email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email) && email.length <= 254
+}
+
+const validatePassword = (password: string) => {
+  // Basic password validation
+  return password.length >= 8 && password.length <= 128
 }
 
 const handleLogin = async () => {
@@ -37,6 +44,10 @@ const handleLogin = async () => {
   }
   if (!validateEmail(email.value)) {
     error.value = 'Invalid email address.'
+    return
+  }
+  if (!validatePassword(password.value)) {
+    error.value = 'Password must be between 8 and 128 characters.'
     return
   }
 
@@ -75,53 +86,123 @@ const handleResetPassword = async () => {
 
 <template>
   <DefaultLayout>
-    <div
-      class="max-w-md mx-auto mt-12 p-8 bg-white dark:bg-zinc-800 rounded shadow"
-    >
-      <h1 class="text-2xl font-bold mb-6 text-zinc-800 dark:text-white">
-        Login
-      </h1>
-      <form @submit.prevent="handleLogin" class="space-y-4">
-        <HInput
-          v-model="email"
-          label="Email"
-          id="email"
-          type="email"
-          required
-        />
-        <HInput
-          v-model="password"
-          label="Password"
-          id="password"
-          type="password"
-          required
-        />
-        <HButton label="Login" class-name="mt-4" />
-        <div v-if="error" class="text-red-600 dark:text-red-400 mt-2">
-          {{ error }}
+    <div class="min-h-[calc(100vh-200px)] flex items-center justify-center py-12">
+      <div class="animate-fade-in-up w-full">
+        <div class="modern-card max-w-md w-full mx-auto p-8">
+          <!-- Header -->
+          <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl mx-auto mb-4 flex items-center justify-center">
+              <span class="text-white font-bold text-xl">🔐</span>
+            </div>
+            <h1 class="heading-md mb-2">Welcome Back</h1>
+            <p class="text-muted">Sign in to your account to continue</p>
+          </div>
+
+          <!-- Login Form -->
+          <form @submit.prevent="handleLogin" class="form-modern">
+            <div class="form-group">
+              <HInput
+                v-model="email"
+                label="Email"
+                id="email"
+                type="email"
+                required
+                class="input-modern focus-modern"
+                placeholder="Enter your email"
+              />
+            </div>
+            
+            <div class="form-group">
+              <HInput
+                v-model="password"
+                label="Password"
+                id="password"
+                type="password"
+                required
+                class="input-modern focus-modern"
+                placeholder="Enter your password"
+              />
+            </div>
+
+            <!-- Error/Success Messages -->
+            <div v-if="error" class="alert alert-error">
+              {{ error }}
+            </div>
+            <div v-if="success" class="alert alert-success">
+              {{ success }}
+            </div>
+
+            <!-- Submit Button -->
+            <HButton 
+              label="Sign In" 
+              class="btn-modern w-full"
+              :disabled="!email || !password"
+            />
+          </form>
+
+          <!-- Additional Actions -->
+          <div class="mt-6 space-y-4">
+            <div class="text-center">
+              <button
+                @click="() => (showResetModal = true)"
+                class="text-sm text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors"
+              >
+                Forgot your password?
+              </button>
+            </div>
+            
+            <div class="text-center pt-4 border-t border-slate-200 dark:border-slate-700">
+              <p class="text-sm text-muted">
+                Don't have an account?
+                <RouterLink 
+                  to="/register" 
+                  class="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 font-medium transition-colors"
+                >
+                  Sign up
+                </RouterLink>
+              </p>
+            </div>
+          </div>
         </div>
-        <div v-if="success" class="text-green-600 dark:text-green-400 mt-2">
-          {{ success }}
-        </div>
-      </form>
-      <HButton
-        label="Reset Password"
-        @click="() => (showResetModal = true)"
-        withoutBackground
-        class-name="mt-4"
-      />
+      </div>
     </div>
+
+    <!-- Reset Password Modal -->
     <HModal v-model:modelValue="showResetModal">
       <template #content>
-        <p class="mb-4">Please enter your email to reset your password.</p>
-        <HInput v-model="resetEmail" label="Email" type="email" required />
+        <div class="text-center mb-6">
+          <h3 class="heading-sm mb-2">Reset Password</h3>
+          <p class="text-muted">Enter your email address and we'll send you a link to reset your password.</p>
+        </div>
+        
+        <div class="form-group">
+          <HInput 
+            v-model="resetEmail" 
+            label="Email" 
+            type="email" 
+            required 
+            class="input-modern focus-modern"
+            placeholder="Enter your email"
+          />
+        </div>
+        
+        <div v-if="error" class="alert alert-error mt-4">
+          {{ error }}
+        </div>
       </template>
       <template #footer>
-        <HButton
-          label="Send Reset Link"
-          @click="handleResetPassword"
-          class="mt-4"
-        />
+        <div class="flex gap-3 justify-end">
+          <HButton
+            label="Cancel"
+            @click="showResetModal = false"
+            class="btn-modern"
+          />
+          <HButton
+            label="Send Reset Link"
+            @click="handleResetPassword"
+            class="btn-modern"
+          />
+        </div>
       </template>
     </HModal>
   </DefaultLayout>

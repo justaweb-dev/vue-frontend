@@ -21,22 +21,32 @@ export const useUserStore = defineStore('user', () => {
 
   const setToken = (jwt: string) => {
     token.value = jwt
-    localStorage.setItem('jwt', jwt)
+    // Store in sessionStorage instead of localStorage for better security
+    sessionStorage.setItem('jwt', jwt)
   }
 
   const clearCurrentUser = () => {
     user.value = null
     token.value = null
-    localStorage.removeItem('jwt')
+    sessionStorage.removeItem('jwt')
+    localStorage.removeItem('jwt') // Remove legacy localStorage tokens
   }
 
   const loadToken = () => {
-    const stored = localStorage.getItem('jwt')
-    if (stored) token.value = stored
+    // Try sessionStorage first, then localStorage for migration
+    const stored = sessionStorage.getItem('jwt') || localStorage.getItem('jwt')
+    if (stored) {
+      token.value = stored
+      // Migrate from localStorage to sessionStorage if needed
+      if (!sessionStorage.getItem('jwt') && localStorage.getItem('jwt')) {
+        sessionStorage.setItem('jwt', stored)
+        localStorage.removeItem('jwt')
+      }
+    }
   }
 
   const getCurrentUser = async (jwt?: string): Promise<User | null> => {
-    const authToken = jwt || token.value || localStorage.getItem('jwt')
+    const authToken = jwt || token.value || sessionStorage.getItem('jwt') || localStorage.getItem('jwt')
     if (!authToken) return null
     try {
       const res = await fetch(`${API_URL}/api/users/me?populate=*`, {

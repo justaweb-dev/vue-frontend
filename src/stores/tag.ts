@@ -47,7 +47,14 @@ export const useTagStore = defineStore('tag', () => {
 
       const data = await res.json()
       if (!res.ok) throw new Error('Error fetching tags')
-      tags.value = data.data.map((t: any) => ({ id: t.id, ...t }))
+      tags.value = data.data.map((t: any) => ({
+        id: typeof t.id === 'string' ? parseInt(t.id, 10) : t.id,
+        name: t.attributes?.name || '',
+        createdAt: t.attributes?.createdAt || '',
+        updatedAt: t.attributes?.updatedAt || '',
+        publishedAt: t.attributes?.publishedAt || '',
+        ...t.attributes
+      }))
     } catch (e) {
       tags.value = []
       console.error('Failed to fetch tags:', e)
@@ -66,8 +73,13 @@ export const useTagStore = defineStore('tag', () => {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data?.error?.message || 'Error creating tag')
-      const newTag = { id: data.data.id, ...data.data.attributes }
-      tags.value.push(newTag)
+      // Defensive: ensure we always return a tag object with id and name
+      const newTag = {
+        id: data.data.id,
+        name: data.data.attributes?.name || name,
+        ...data.data.attributes
+      }
+      // NO push a tags.value aquí
       return newTag
     } catch (e) {
       console.error('Failed to create tag:', e)

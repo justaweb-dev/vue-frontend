@@ -5,3 +5,431 @@ If you want your dark theme to be driven by a CSS selector instead of the prefer
 Now instead of dark:* utilities being applied based on prefers-color-scheme, they will be applied whenever the dark class is present earlier in the HTML tree
 */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Modern Design System */
+:root {  
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  
+  /* Border radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* Global Styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Modern Card Component */
+.modern-card {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  border: 1px solid rgb(226 232 240 / 0.5);
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+
+.modern-card:hover {
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  border-color: rgb(203 213 225);
+}
+
+.dark .modern-card {
+  background-color: rgb(30 41 59);
+  border-color: rgb(51 65 85 / 0.5);
+}
+
+.dark .modern-card:hover {
+  border-color: rgb(71 85 105);
+}
+
+/* Modern Button Styles */
+.btn-modern {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.btn-modern:focus {
+  ring: 2px;
+  ring-offset: 2px;
+}
+
+.btn-outline {
+  border: 1px solid rgb(203 213 225);
+  color: rgb(51 65 85);
+}
+
+.btn-outline:hover {
+  background-color: rgb(248 250 252);
+}
+
+.dark .btn-outline {
+  border-color: rgb(71 85 105);
+  color: rgb(203 213 225);
+}
+
+.dark .btn-outline:hover {
+  background-color: rgb(30 41 59);
+}
+
+/* Modern Input Styles */
+.input-modern {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(203 213 225);
+  background-color: white;
+  color: rgb(15 23 42);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input-modern::placeholder {
+  color: rgb(100 116 139);
+}
+
+.input-modern:focus {
+  border-color: rgb(16 185 129);
+  ring: 2px;
+  ring-color: rgb(16 185 129 / 0.2);
+}
+
+.dark .input-modern {
+  border-color: rgb(71 85 105);
+  background-color: rgb(30 41 59);
+  color: rgb(241 245 249);
+}
+
+.dark .input-modern::placeholder {
+  color: rgb(148 163 184);
+}
+
+/* Modern Form Styles */
+.form-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(51 65 85);
+}
+
+.dark .form-label {
+  color: rgb(203 213 225);
+}
+
+.form-error {
+  font-size: 0.875rem;
+  color: rgb(220 38 38);
+}
+
+.dark .form-error {
+  color: rgb(248 113 113);
+}
+
+.form-success {
+  font-size: 0.875rem;
+  color: rgb(16 185 129);
+}
+
+.dark .form-success {
+  color: rgb(52 211 153);
+}
+
+/* Modern Typography */
+.heading-xl {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: rgb(15 23 42);
+  line-height: 1.25;
+}
+
+@media (min-width: 768px) {
+  .heading-xl {
+    font-size: 3rem;
+  }
+}
+
+.dark .heading-xl {
+  color: rgb(241 245 249);
+}
+
+.heading-lg {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: rgb(15 23 42);
+  line-height: 1.25;
+}
+
+@media (min-width: 768px) {
+  .heading-lg {
+    font-size: 2.25rem;
+  }
+}
+
+.dark .heading-lg {
+  color: rgb(241 245 249);
+}
+
+.heading-md {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: rgb(15 23 42);
+  line-height: 1.25;
+}
+
+@media (min-width: 768px) {
+  .heading-md {
+    font-size: 1.875rem;
+  }
+}
+
+.dark .heading-md {
+  color: rgb(241 245 249);
+}
+
+.heading-sm {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgb(15 23 42);
+  line-height: 1.25;
+}
+
+@media (min-width: 768px) {
+  .heading-sm {
+    font-size: 1.5rem;
+  }
+}
+
+.dark .heading-sm {
+  color: rgb(241 245 249);
+}
+
+.text-muted {
+  color: rgb(100 116 139);
+}
+
+.dark .text-muted {
+  color: rgb(148 163 184);
+}
+
+/* Modern Animations */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s ease-out;
+}
+
+/* Modern Loading Spinner */
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: rgb(226 232 240);
+  border-radius: 0.25rem;
+}
+
+.dark .loading-pulse {
+  background-color: rgb(51 65 85);
+}
+
+/* Modern Grid */
+.grid-modern {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .grid-modern {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-modern {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Modern Container */
+.container-modern {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-modern {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-modern {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Modern Alert Styles */
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border-width: 1px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.alert-success {
+  background-color: rgb(236 253 245);
+  border-color: rgb(167 243 208);
+  color: rgb(6 78 59);
+}
+
+.dark .alert-success {
+  background-color: rgba(6 78 59, 0.2);
+  border-color: rgb(6 78 59);
+  color: rgb(167 243 208);
+}
+
+.alert-error {
+  background-color: rgb(254 242 242);
+  border-color: rgb(252 165 165);
+  color: rgb(127 29 29);
+}
+
+.dark .alert-error {
+  background-color: rgba(127 29 29, 0.2);
+  border-color: rgb(127 29 29);
+  color: rgb(252 165 165);
+}
+
+.alert-warning {
+  background-color: rgb(255 251 235);
+  border-color: rgb(252 211 77);
+  color: rgb(146 64 14);
+}
+
+.dark .alert-warning {
+  background-color: rgba(146 64 14, 0.2);
+  border-color: rgb(146 64 14);
+  color: rgb(252 211 77);
+}
+
+.alert-info {
+  background-color: rgb(239 246 255);
+  border-color: rgb(147 197 253);
+  color: rgb(30 58 138);
+}
+
+.dark .alert-info {
+  background-color: rgba(30 58 138, 0.2);
+  border-color: rgb(30 58 138);
+  color: rgb(147 197 253);
+}
+
+/* Modern Focus Styles */
+.focus-modern:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: rgb(16 185 129 / 0.5);
+  ring-offset-width: 2px;
+  ring-offset-color: white;
+}
+
+.dark .focus-modern:focus {
+  ring-offset-color: rgb(15 23 42);
+}
+
+/* Responsive Utilities */
+@media (max-width: 640px) {
+  .mobile-hidden {
+    display: none;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

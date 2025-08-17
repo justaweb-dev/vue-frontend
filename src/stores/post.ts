@@ -57,16 +57,16 @@ export const usePostStore = defineStore('post', () => {
       })
       const data = await res.json()
       if (!res.ok) {
-        console.log('Failed to create post.')
-        return { success: false, message: '' }
+        console.error('Failed to create post.')
+        return { success: false, message: data?.error?.message || 'Failed to create post.' }
       }
       post.value = data.data
         ? { ...data.data.attributes, id: data.data.id }
         : null
       return { success: true, message: 'Post created successfully!' }
     } catch (err: any) {
-      console.log('Failed to create post.')
-      return { success: false, message: '' }
+      console.error('Failed to create post:', err.message)
+      return { success: false, message: 'An unexpected error occurred.' }
     }
   }
 
@@ -106,16 +106,16 @@ export const usePostStore = defineStore('post', () => {
       })
       const data = await res.json()
       if (!res.ok) {
-        console.log('Failed to update post.')
-        return { success: false, message: data?.error?.message || '' }
+        console.error('Failed to update post.')
+        return { success: false, message: data?.error?.message || 'Failed to update post.' }
       }
       post.value = data.data
         ? { ...data.data, id: data.data.id }
         : null
       return { success: true, message: 'Post updated successfully!' }
     } catch (err: any) {
-      console.log('Failed to update post.')
-      return { success: false, message: err?.message || '' }
+      console.error('Failed to update post:', err.message)
+      return { success: false, message: 'An unexpected error occurred.' }
     }
   }
 

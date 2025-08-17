@@ -72,6 +72,8 @@ onMounted(async () => {
     await fetchAllTags(token.value!)
     if (route.params.id) {
       await fetchPostById(route.params.id as string, token.value!)
+      // Re-fetch all tags to ensure the tags of the edited post exist
+      await fetchAllTags(token.value!)
       if (post.value) {
         title.value = post.value.title
         body.value = post.value.body
@@ -137,9 +139,19 @@ const handleCreateOrEdit = async () => {
     error.value = 'You must be logged in to create or edit a post.'
     return
   }
+  // --- Synchronize tags before saving ---
+  if (token.value) {
+    await fetchAllTags(token.value as string)
+  }
+  // Normalize all selectedTags IDs to numbers
+  selectedTags.value = selectedTags.value.map(normalizeId)
+  const normalizedSelectedTags = selectedTags.value.map(normalizeId)
   // --- Prepare payload for API ---
-  const tagsDocumentIds = selectedTags.value
-    .map(tagId => tags.value.find(t => t.id === tagId)?.documentId)
+  const tagsDocumentIds = normalizedSelectedTags
+    .map(tagId => {
+      const tag = tags.value.find(t => normalizeId(t.id) === tagId)
+      return tag?.documentId ?? tag?.id
+    })
     .filter(Boolean)
   const payload = {
     title: title.value,
@@ -151,20 +163,30 @@ const handleCreateOrEdit = async () => {
     users_permissions_user: { set: userId },
   }
   // --- Create or update post ---
+  let result
   if (route.params.id) {
     if (updatePost) {
-      const result = await updatePost(route.params.id as string, payload as any, token.value!)
+      result = await updatePost(route.params.id as string, payload as any, token.value as string)
       if (result.success) {
         success.value = 'Post updated successfully!'
+        // Refresh tags and post to ensure badges and dropdown are synchronized
+        if (token.value && route.params.id) {
+          await fetchAllTags(token.value as string)
+          await fetchPostById(route.params.id as string, token.value as string)
+        }
         setTimeout(() => router.push('/posts/' + route.params.id), 500)
       } else {
         error.value = result.message || 'Failed to update post.'
       }
     }
   } else {
-    const result = await createPost(payload as any, token.value!)
+    result = await createPost(payload as any, token.value as string)
     if (result.success) {
       success.value = 'Post created successfully!'
+      // Refresh tags to ensure badges and dropdown are synchronized
+      if (token.value) {
+        await fetchAllTags(token.value as string)
+      }
       setTimeout(() => router.push('/posts'), 500)
     } else {
       error.value = result.message || 'Failed to create post.'
@@ -183,14 +205,23 @@ const filteredTags = computed(() => {
   )
 })
 
-// Called on input event: opens dropdown and resets highlight
+// Handles input in the tag input field: opens dropdown and resets highlight
 const handleTagInput = () => {
-  tagDropdownOpen.value = !!tagInput.value.trim() && filteredTags.value.length > 0
-  highlightedTagIndex.value = filteredTags.value.length > 0 ? 0 : -1
+  tagDropdownOpen.value = true
+  highlightedTagIndex.value = -1
 }
 
-// Handles keyboard navigation and selection in the dropdown
+// Prevent Enter on tag input from submitting the form
 const handleTagInputKeydown = async (e: KeyboardEvent) => {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    if (tagDropdownOpen.value && highlightedTagIndex.value >= 0 && highlightedTagIndex.value < filteredTags.value.length) {
+      handleTagSelect(filteredTags.value[highlightedTagIndex.value])
+    } else {
+      await handleTagInputEnter()
+    }
+    return
+  }
   if (!tagDropdownOpen.value || filteredTags.value.length === 0) return
   if (e.key === 'ArrowDown') {
     e.preventDefault()
@@ -198,13 +229,6 @@ const handleTagInputKeydown = async (e: KeyboardEvent) => {
   } else if (e.key === 'ArrowUp') {
     e.preventDefault()
     highlightedTagIndex.value = (highlightedTagIndex.value - 1 + filteredTags.value.length) % filteredTags.value.length
-  } else if (e.key === 'Enter') {
-    e.preventDefault()
-    if (highlightedTagIndex.value >= 0 && highlightedTagIndex.value < filteredTags.value.length) {
-      handleTagSelect(filteredTags.value[highlightedTagIndex.value])
-    } else {
-      await handleTagInputEnter()
-    }
   }
 }
 
@@ -217,17 +241,49 @@ const handleTagSelect = (tag: Tag) => {
   tagDropdownOpen.value = false
 }
 
-// Handles Enter key: selects if tag exists, creates if not
+// --- Tag creation logic ---
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+type TagType = {
+  id: number | string
+  name: string
+  documentId?: number | string
+  [key: string]: any
+}
+const normalizeTag = (tag: any): Tag => {
+  if (!tag) return {
+    id: 0,
+    name: '',
+    documentId: '',
+    createdAt: '',
+    updatedAt: '',
+    publishedAt: '',
+  }
+  return {
+    ...tag,
+    id: typeof tag.id === 'string' ? parseInt(tag.id, 10) : tag.id,
+    name: tag.name,
+    documentId: tag.documentId ?? tag.id,
+    createdAt: tag.createdAt ?? '',
+    updatedAt: tag.updatedAt ?? '',
+    publishedAt: tag.publishedAt ?? '',
+  }
+}
+
+// Utility to ensure all IDs are numbers (Strapi can return strings or numbers)
+function normalizeId(id: string | number): number {
+  return typeof id === 'string' ? parseInt(id, 10) : id
+}
+
 const handleTagInputEnter = async () => {
   const input = tagInput.value.trim()
   if (!input) return
-  // If it already exists, select it
-  const found = tags.value.find(t => t.name.toLowerCase() === input.toLowerCase())
+  // Search by name ignoring case sensitivity
+  let found = tags.value.find(t => t.name.toLowerCase() === input.toLowerCase())
   if (found) {
     handleTagSelect(found)
     return
   }
-  // If it does not exist, create it in the backend and select it
   if (!token.value) {
     loadToken()
     tagError.value = 'No token loaded.'
@@ -235,15 +291,31 @@ const handleTagInputEnter = async () => {
   }
   isCreatingTag.value = true
   const created = await tagStore.createTag(input, token.value)
-  isCreatingTag.value = false
-  if (created) {
-    selectedTags.value.push(created.id)
-    tagInput.value = ''
-    await fetchAllTags(token.value)
-    tagDropdownOpen.value = false
-  } else {
-    tagError.value = 'Could not create tag.'
+  tagInput.value = ''
+  await delay(400)
+  await fetchAllTags(token.value as string)
+  await delay(400)
+  await fetchAllTags(token.value as string)
+  let newTag = tags.value.find(t => t.name.toLowerCase() === input.toLowerCase())
+  if (!newTag && created) {
+    // If the backend hasn't returned it yet, add it temporarily
+    const normalizedCreated = normalizeTag(created)
+    if (!tags.value.some(t => normalizeId(t.id) === normalizeId(normalizedCreated.id))) {
+      tags.value.push(normalizedCreated)
+    }
+    newTag = normalizedCreated
   }
+  if (newTag) {
+    const tagId = normalizeId(newTag.id)
+    if (!selectedTags.value.map(normalizeId).includes(tagId)) {
+      selectedTags.value.push(tagId)
+    }
+    tagDropdownOpen.value = false
+    tagError.value = ''
+  } else {
+    tagError.value = 'El tag fue creado pero aún no está disponible. Espera unos segundos y vuelve a intentarlo.'
+  }
+  isCreatingTag.value = false
 }
 
 // Removes a tag from the selectedTags list
